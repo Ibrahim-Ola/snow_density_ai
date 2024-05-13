@@ -10,5 +10,5 @@ SnowDensityAI: statistical and machine learning model for snow density and anow 
 
 * $R^2$
 
-![alt text](https://github.com/Ibrahim-Ola/snow_density_ai/blob/main/plots/rsq_model_comparison.png.png)
+![alt text](https://github.com/Ibrahim-Ola/snow_density_ai/blob/main/plots/rsq_model_comparison.png)
 
