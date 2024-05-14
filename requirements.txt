@@ -1,4 +1,5 @@
 torch==2.3.0
 numpy==1.26.4
+gdown==5.2.0
 xgboost==2.0.3
 platformdirs==4.2.1
