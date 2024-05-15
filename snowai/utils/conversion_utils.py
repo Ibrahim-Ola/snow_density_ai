@@ -152,8 +152,8 @@ class ConvertData:
 
 
         if raster is None:
-            ensure_raster_available()
-            cache_path = get_cache_path()
+            ensure_raster_available(filename="SnowClass_NA_300m_10.0arcsec_2021_v01.0.nc")
+            cache_path = get_cache_path(filename="SnowClass_NA_300m_10.0arcsec_2021_v01.0.nc")
             raster = rioxarray.open_rasterio(cache_path)
         
         snow_class_dict=dict(
