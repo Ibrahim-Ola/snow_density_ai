@@ -14,13 +14,11 @@ Email: ibrahimolalekana@u.boisestate.edu
 Institution: Boise State University
 """
 
-
-import argparse
+## Import libraries
 import numpy as np
 import pandas as pd
 from typing import Optional, Any
 from ..utils.hill_model_utils import swe_acc_and_abl, SWE_Hill
-from ..utils.sturm_model_constants import VALID_SNOW_CLASSES
 from ..density import (
     SturmDensity, 
     JonasDensity, 
