@@ -54,7 +54,7 @@ class SturmDensity:
         density_est = (rho_max - rho_0) * (1 - np.exp(-k1 * h - k2 * doy)) + rho_0
         return density_est
 
-    def compute_density(
+    def predict(
         self, 
         snow_depth: float, 
         DOY: int | float | str | pd.Timestamp | datetime.datetime, 
@@ -127,7 +127,7 @@ class JonasDensity:
         density_est = (a * h) + b
         return density_est
 
-    def compute_density(
+    def predict(
         self, 
         snow_depth: float,
         month: str,
@@ -178,7 +178,7 @@ class PistochiDensity:
     def __init__(self):
         pass
 
-    def compute_density(self, DOY: int | float | str | pd.Timestamp | datetime.datetime) -> float:
+    def predict(self, DOY: int | float | str | pd.Timestamp | datetime.datetime) -> float:
 
         """
         A function to compute snow density using the Pistochi Model.
