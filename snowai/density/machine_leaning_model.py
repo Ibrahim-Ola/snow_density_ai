@@ -3,9 +3,8 @@ import xgboost as xgb
 from ..utils._other_utils import clean_cache
 from ..utils.xgboost_utils import download_model
 
-class SnowDensityPredictor:
+class MachineLearningDensity:
     def __init__(self, model_location: str = None):
-
         self.model_location = model_location
         self.model = self.load_model()
 
