@@ -1,7 +1,8 @@
 
 import datetime
 import pandas as pd
-from .conversion_utils import ConvertData, OutOfBoundsError
+from .conversion_utils import ConvertData
+from ._other_utils import OutOfBoundsError
 
 
 def validate_DOY(x: int | float | str | pd.Timestamp | datetime.datetime, origin: int = None) -> int:
