@@ -1,9 +1,14 @@
 
+import os
+import gdown
 import datetime
 import numpy as np
 import pandas as pd
+from platformdirs import user_cache_dir
 
-
+class OutOfBoundsError(Exception):
+    """Exception raised when coordinates are outside the raster bounds."""
+    pass
 
 def datetime_to_SturmWaterYear(date: datetime.datetime | pd.Timestamp, origin: int =10) -> int | float:
         """
@@ -87,3 +92,30 @@ def datetime_to_WaterYear(date: datetime.datetime | pd.Timestamp, origin : int =
     DOY = (date - water_year_start).days + 1
     
     return DOY
+
+def get_cache_path(filename="SnowClass_NA_300m_10.0arcsec_2021_v01.0.nc"):
+    """
+    Returns the path to the cached file, ensuring the cache directory exists.
+    """
+    cache_dir = user_cache_dir(appname="CroGarsAI", appauthor="BoiseStateUniversity", opinion=False)
+    if not os.path.exists(cache_dir):
+        os.makedirs(cache_dir)
+    return os.path.join(cache_dir, filename)
+
+def ensure_raster_available():
+    """
+    Ensures that the necessary raster file is available in the cache,
+    downloading it if necessary, but only after user consent.
+    """
+    cache_path = get_cache_path()
+    if not os.path.exists(cache_path):
+        print("Snow classification raster needs to be downloaded.")
+        print("This file is approximately 2 GB in size and will be stored at: {}".format(cache_path))
+        user_input = input("Do you want to proceed with the download? (yes/no): ")
+        if user_input.lower() == 'yes':
+            raster_url = "https://drive.google.com/file/d/1yhthVbkdBNm_pL5wl5YlwNaKN96iUGa8/view?usp=sharing" 
+            print("Downloading now...")
+            gdown.download(url=raster_url, output=cache_path, fuzzy=True, quiet=False)
+            print("Download complete.")
+        else:
+            print("Download aborted. The application may not function properly without the raster data.")
