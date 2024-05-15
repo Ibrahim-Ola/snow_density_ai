@@ -5,7 +5,7 @@ def parse_requirements(filename):
     with open(filename, 'r') as file:
         return [line.strip() for line in file if line.strip() and not line.startswith("#")]
 
-PROJNAME = "sonw_sensity_ai"
+PROJNAME = "sonw_density_ai"
 DESCRIPTION = "A project that predicts snow density and SWE using machine learning models and statistical models."
 with open("README.md") as f:
     LONG_DESCRIPTION = f.read()
