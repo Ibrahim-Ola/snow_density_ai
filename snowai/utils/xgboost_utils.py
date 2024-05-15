@@ -2,7 +2,18 @@
 import datetime
 import pandas as pd
 from .conversion_utils import ConvertData
-from ._other_utils import OutOfBoundsError
+from ._other_utils import OutOfBoundsError, get_cache_path, ensure_file_available
+
+
+def download_model():
+    """
+    Downloads the machine learning model.
+    """
+
+    ensure_file_available("density_model.ubj")
+    return get_cache_path("density_model.ubj")
+
+    
 
 
 def validate_DOY(x: int | float | str | pd.Timestamp | datetime.datetime, origin: int = None) -> int:
