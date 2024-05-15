@@ -9,8 +9,7 @@ Email: ibrahimolalekana@u.boisestate.edu
 Institution: Boise State University (CryoGars Lab)
 """
 
-import os
-import gdown
+## Import libraries
 import datetime
 import rioxarray
 import numpy as np
