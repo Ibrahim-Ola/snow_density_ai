@@ -3,7 +3,7 @@ import warnings
 import numpy as np
 from typing import Dict
 
-def swe_acc_and_abl(self, pptwt: float, TD: float, DOY: int, h: float) -> Dict[str, float]:
+def swe_acc_and_abl(pptwt: float, TD: float, DOY: int, h: float) -> Dict[str, float]:
     """
     Calculate accumulated and ablated snow water equivalent using Hill et al. (2019).
 
@@ -38,7 +38,7 @@ def swe_acc_and_abl(self, pptwt: float, TD: float, DOY: int, h: float) -> Dict[s
         return {'swe_acc': np.nan, 'swe_abl': np.nan}
     
 
-def SWE_Hill(self, swe_acc: float, swe_abl: float, DOY: int, DOY_: int = 180) -> float:
+def SWE_Hill(swe_acc: float, swe_abl: float, DOY: int, DOY_: int = 180) -> float:
     """
     Compute the snow water equivalent on a particular day using Hill et al. (2019)'s model.
 
