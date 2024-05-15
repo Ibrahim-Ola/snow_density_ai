@@ -19,11 +19,9 @@ from ._other_utils import (
     get_cache_path,
     OutOfBoundsError,
     datetime_to_WaterYear, 
-    ensure_raster_available,
+    ensure_file_available,
     datetime_to_SturmWaterYear, 
 )
-
-
 
 
 class ConvertData:
@@ -152,7 +150,7 @@ class ConvertData:
 
 
         if raster is None:
-            ensure_raster_available(filename="SnowClass_NA_300m_10.0arcsec_2021_v01.0.nc")
+            ensure_file_available(filename="SnowClass_NA_300m_10.0arcsec_2021_v01.0.nc")
             cache_path = get_cache_path(filename="SnowClass_NA_300m_10.0arcsec_2021_v01.0.nc")
             raster = rioxarray.open_rasterio(cache_path)
         
