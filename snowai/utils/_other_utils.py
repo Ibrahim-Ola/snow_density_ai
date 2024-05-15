@@ -136,3 +136,26 @@ def ensure_file_available(filename):
             print("Download complete.")
         else:
             print("Download aborted. The application may not function properly without the raster data.")
+
+def clean_cache(filename: str = None):
+    """
+    Clears the cache directory.
+    """
+    if filename == 'density':
+        cache_file= get_cache_path("density_model.ubj")
+    
+    elif filename == 'snow_class':
+        cache_file= get_cache_path("SnowClass_NA_300m_10.0arcsec_2021_v01.0.nc")
+
+    else:
+        raise ValueError("Invalid filename. Choose 'density' or 'snow_class'.")
+    
+    try:
+        if os.path.exists(cache_file):
+            os.remove(cache_file)
+            print(f"Cleared cached file at {cache_file}")
+        else:
+            print(f"No cached file found at {cache_file}")
+    except Exception as e:
+        print(f"Error deleting {cache_file}: {e}")
+
