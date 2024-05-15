@@ -63,7 +63,7 @@ class HillSWE:
         return swe / 10  # Adjusted to convert to cm (orginally in mm)
 
 
-class SWE_Models(HillSWE):
+class StatisticalModels(HillSWE):
     def __init__(self, algorithm: str = 'default', **kwargs: Any):
         """
         Initialize the SWE model with a specified algorithm and additional keyword arguments.
