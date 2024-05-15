@@ -93,7 +93,7 @@ def datetime_to_WaterYear(date: datetime.datetime | pd.Timestamp, origin : int =
     
     return DOY
 
-def get_cache_path(filename="SnowClass_NA_300m_10.0arcsec_2021_v01.0.nc"):
+def get_cache_path(filename: str):
     """
     Returns the path to the cached file, ensuring the cache directory exists.
     """
@@ -102,18 +102,35 @@ def get_cache_path(filename="SnowClass_NA_300m_10.0arcsec_2021_v01.0.nc"):
         os.makedirs(cache_dir)
     return os.path.join(cache_dir, filename)
 
-def ensure_raster_available():
+def ensure_raster_available(filename):
     """
-    Ensures that the necessary raster file is available in the cache,
+    Ensures that the necessary file is available in the cache,
     downloading it if necessary, but only after user consent.
     """
-    cache_path = get_cache_path()
+
+    filenames_map={
+        "SnowClass_NA_300m_10.0arcsec_2021_v01.0.nc": "Snow Classification raster",
+        "density_model.ubj": "Machine Learning Wegiths"
+    }
+
+    cache_path = get_cache_path(filename)
+
+    file = filenames_map[filename]
+
     if not os.path.exists(cache_path):
-        print("Snow classification raster needs to be downloaded.")
-        print("This file is approximately 2 GB in size and will be stored at: {}".format(cache_path))
+        print(f"The {file} needs to be downloaded.")
+        if file == "Snow Classification raster":
+            print("This file is approximately 1.9 GB in size and will be stored at: {}".format(cache_path))
+        
+        else:
+            print("This file is approximately 180 MB in size and will be stored at: {}".format(cache_path))
+        
         user_input = input("Do you want to proceed with the download? (yes/no): ")
-        if user_input.lower() == 'yes':
-            raster_url = "https://drive.google.com/file/d/1yhthVbkdBNm_pL5wl5YlwNaKN96iUGa8/view?usp=sharing" 
+        if user_input.lower() == 'yes' or user_input.lower() == 'y' or user_input.lower() == 'true':
+            if file == "Snow Classification raster":
+                raster_url = "https://drive.google.com/file/d/1yhthVbkdBNm_pL5wl5YlwNaKN96iUGa8/view?usp=sharing"
+            else:
+                raster_url = "https://drive.google.com/file/d/11FwI4Y8IYGP_6m2evQIv4Tu2l7F6edCK/view?usp=sharing"
             print("Downloading now...")
             gdown.download(url=raster_url, output=cache_path, fuzzy=True, quiet=False)
             print("Download complete.")
