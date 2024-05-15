@@ -102,7 +102,7 @@ def get_cache_path(filename: str):
         os.makedirs(cache_dir)
     return os.path.join(cache_dir, filename)
 
-def ensure_raster_available(filename):
+def ensure_file_available(filename):
     """
     Ensures that the necessary file is available in the cache,
     downloading it if necessary, but only after user consent.
