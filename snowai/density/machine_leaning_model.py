@@ -1,12 +1,13 @@
 
-
 import xgboost as xgb
+from ..utils._other_utils import clean_cache
 from ..utils.xgboost_utils import download_model
 
 class SnowDensityPredictor:
     def __init__(self, model_location: str = None):
 
         self.model_location = model_location
+        self.model = self.load_model()
 
     def load_model(self):
 
@@ -20,3 +21,6 @@ class SnowDensityPredictor:
 
     def predict(self, input_data):
         return self.model.predict(input_data)
+    
+    def clear_cache(self):
+        clean_cache('density')
