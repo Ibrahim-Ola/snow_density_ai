@@ -31,7 +31,7 @@ class HillSWE:
         """Initialize the HillSWE class."""
         pass
 
-    def compute_swe(self, pptwt: float, TD: float, DOY: int, snow_depth: float) -> Optional[float]:
+    def predict(self, pptwt: float, TD: float, DOY: int, snow_depth: float) -> Optional[float]:
         """
         Compute the snow water equivalent (SWE) based on precipitation weight, temperature difference, day of the year, and height or depth parameter.
 
@@ -77,7 +77,7 @@ class StatisticalModels(HillSWE):
         self.algorithm = algorithm
         self.kwargs = kwargs
 
-    def calculate_swe(self) -> float:
+    def predict(self) -> float:
         """
         Calculate the snow water equivalent (SWE) based on the chosen algorithm and parameters.
 
@@ -95,24 +95,24 @@ class StatisticalModels(HillSWE):
             return self.default_SWE(depth, density)
         
         elif self.algorithm.lower() == 'hill':
-            return self.compute_swe(**self.kwargs)
+            return super().predict(**self.kwargs)
         
         elif self.algorithm.lower() == 'sturm':
             depth = self.kwargs.get('snow_depth', np.nan)
             DOY = self.kwargs.get('DOY', np.nan)
             snow_class = self.kwargs.get('snow_class', np.nan)
-            density = SturmDensity().compute_density(snow_depth=depth, DOY=DOY, snow_class=snow_class)
+            density = SturmDensity().predict(snow_depth=depth, DOY=DOY, snow_class=snow_class)
             return self.default_SWE(depth, density)
 
         elif self.algorithm.lower() == 'jonas':
             depth = self.kwargs.get('snow_depth', np.nan)
             month = self.kwargs.get('month', np.nan)
             elevation = self.kwargs.get('elevation', np.nan)
-            density = JonasDensity().compute_density(snow_depth=depth, month=month, elevation=elevation)
+            density = JonasDensity().predict(snow_depth=depth, month=month, elevation=elevation)
             return self.default_SWE(depth*100, density)
 
         elif self.algorithm.lower() == 'pistochi':
-            density = PistochiDensity().compute_density(DOY=self.kwargs.get('DOY', np.nan))
+            density = PistochiDensity().predict(DOY=self.kwargs.get('DOY', np.nan))
             depth = self.kwargs.get('snow_depth', np.nan)
             return self.default_SWE(depth, density)
         
