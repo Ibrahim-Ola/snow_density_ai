@@ -2,7 +2,7 @@
 The :mod:`snowai.density` module includes statistical and machine learning models for computing snow density.
 """
 
-from .statistical_model import (
+from .statistical_models import (
     SturmDensity, 
     JonasDensity, 
     PistochiDensity
