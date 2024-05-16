@@ -3,6 +3,7 @@
 import datetime
 import numpy as np
 import pandas as pd
+from pandas import Timestamp
 from .conversion_utils import ConvertData
 from ._other_utils import OutOfBoundsError
 
@@ -83,49 +84,40 @@ def validate_snow_class(snow_classes: np.ndarray | list | pd.Series) -> np.ndarr
 
     return validated_classes
 
-def validate_SturmDOY(x: int | float | str | pd.Timestamp | datetime.datetime) -> int | float:
+def validate_SturmDOY(x: pd.Series | np.ndarray | list) -> np.ndarray:
     """
-    Validates and converts input into the Sturm et al. (2010) Day of Year (DOY).
-    Handles integer, string representations of dates, and datetime objects.
+    Validates numeric inputs directly within bounds or converts date-like inputs into the Sturm et al. (2010) Day of Year (DOY).
     Returns NaN for out-of-range DOY or dates in excluded months (July to September).
 
     Sturm et al. (2010) - DOI: https://doi.org/10.1175/2010JHM1202.1
 
     Parameters:
-        x (int, str, pd.Timestamp, datetime.datetime): The input to validate and convert.
+        x (pd.Series | np.ndarray | list): The input to validate and convert.
 
     Returns:
-        int or NaN: The Sturm DOY or NaN if the input is invalid or in the excluded range.
+        np.ndarray: The Sturm DOY or NaN if the input is invalid or in the excluded range.
     """
     MIN_DOY = -92
     MAX_DOY = 182
-    EXCLUDED_MONTHS = range(7, 10)  # July, August, September
 
-    try:
-        float_x = float(x)
-    except:
-        pass
-
-    else:
-        if float_x.is_integer():
-            doy = int(float_x)
-            if doy >= MIN_DOY and doy <= MAX_DOY:
-                return doy
-            else:
-                raise OutOfBoundsError(f"DOY must be between {MIN_DOY} and {MAX_DOY}. Got {doy}.")
-        else:
-            raise ValueError(f"DOY must be a whole number. Got {x}.")
+    if not isinstance(x, pd.Series):
+        x = pd.Series(x)
     
-    if isinstance(x, (str, pd.Timestamp, datetime.datetime)):
-        try:
-            timestamp = pd.Timestamp(x) if isinstance(x, str) else x
 
-            if timestamp.month in EXCLUDED_MONTHS:
-                return np.nan
-            else:
-                converter=ConvertData()
-                return converter.date_to_DOY(date=timestamp, algorithm='Sturm')
-        except ValueError as e:
-            raise ValueError(f"Could not convert {x} to a valid DOY. {e}")
+    # Process numeric inputs directly
+    numeric = pd.to_numeric(x, errors='coerce')
+
+    if not numeric.isna().all():
+        validated_doy=np.where((numeric >= MIN_DOY) & (numeric <= MAX_DOY), numeric, np.nan)
+        return validated_doy
+    
     else:
-        raise TypeError(f"Input type is not supported. Expected types are int, float, str, datetime.datetime, or pd.Timestamp, got {type(x).__name__}.")
+        dates = pd.to_datetime(x, errors='coerce')
+
+        if not dates.isna().all():
+            converter=ConvertData()
+            validated_doy=converter.date_to_DOY(dates, origin=10, algorithm='Sturm')
+            return validated_doy
+        
+        else:
+            raise ValueError("Input contains no valid DOY or dates.")
