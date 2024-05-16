@@ -1,11 +1,8 @@
 
 ## Import libraries
-import datetime
 import numpy as np
 import pandas as pd
-from pandas import Timestamp
 from .conversion_utils import ConvertData
-from ._other_utils import OutOfBoundsError
 
 # Constants for snow classes
 VALID_SNOW_CLASSES = ['alpine', 'maritime', 'prairie', 'tundra', 'taiga']
