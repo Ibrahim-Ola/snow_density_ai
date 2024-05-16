@@ -1,5 +1,6 @@
 
 import datetime
+import numpy as np
 import pandas as pd
 from .conversion_utils import ConvertData
 from ._other_utils import OutOfBoundsError, get_cache_path, ensure_file_available
@@ -13,43 +14,39 @@ def download_model():
     ensure_file_available("density_model.ubj")
     return get_cache_path("density_model.ubj")
 
+
+def validate_DOY(x: pd.Series | np.ndarray | list, origin: int = None) -> np.ndarray:
+    """
+    Validates numeric inputs directly within bounds or converts date-like inputs into Day of Year (DOY) with a particular origin (defaults to October 1).
+    Returns NaN for out-of-range DOY or dates in excluded months (July to September).
+
+    Parameters:
+        x (pd.Series | np.ndarray | list): The input to validate and convert.
+
+    Returns:
+        np.ndarray: The Sturm DOY or NaN if the input is invalid or in the excluded range.
+    """
+    MIN_DOY = 1
+    MAX_DOY = 366
+
+    if not isinstance(x, pd.Series):
+        x = pd.Series(x)
     
 
+    # Process numeric inputs directly
+    numeric = pd.to_numeric(x, errors='coerce')
 
-def validate_DOY(x: int | float | str | pd.Timestamp | datetime.datetime, origin: int = None) -> int:
-
-    """
-    Validates or converts an input to a day of the year (DOY).
-    Accepts integer, float, string, datetime.datetime, or pd.Timestamp inputs.
-    If the input is an integer, float, or a string of integer it must be between 1 and 366. 
-    If the input is a string, it must be convertible to a valid date.
-    """
-
-    try:
-        float_x = float(x)
-    except:
-        pass
-
+    if not numeric.isna().all():
+        validated_doy=np.where((numeric >= MIN_DOY) & (numeric <= MAX_DOY), numeric, np.nan)
+        return validated_doy
+    
     else:
-        if float_x.is_integer():
-            doy = int(float_x)
-            if doy >= 1 and doy <= 366:
-                return doy
-            else:
-                raise OutOfBoundsError(f"DOY must be between 1 and 366. Got {doy}.")
-        else:
-            raise ValueError(f"DOY must be a whole number. Got {x}.")
+        dates = pd.to_datetime(x, errors='coerce')
 
-    if isinstance(x, (str, pd.Timestamp, datetime.datetime)):
-        try:
-            timestamp = pd.Timestamp(x) if isinstance(x, str) else x
-
-            if origin < 1 or origin > 12:
-                raise OutOfBoundsError(f"Origin must be between 1 and 12. Got {origin}.")
-
+        if not dates.isna().all():
             converter=ConvertData()
-            return converter.date_to_DOY(date=timestamp, origin=origin, algorithm='default')
-        except ValueError as e:
-            raise ValueError(f"Could not convert {x} to a valid DOY. {e}")
-    else:
-        raise TypeError(f"Input type is not supported. Expected types are int, float, str, datetime.datetime, or pd.Timestamp, got {type(x).__name__}.")
+            validated_doy=converter.date_to_DOY(dates=dates, origin=origin, algorithm='default')
+            return validated_doy
+        
+        else:
+            raise ValueError("Input contains no valid DOY or dates.")
