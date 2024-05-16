@@ -1,17 +1,15 @@
 
 import os
 import gdown
-import datetime
 import numpy as np
 import pandas as pd
-from typing import List
 from platformdirs import user_cache_dir
 
 class OutOfBoundsError(Exception):
     """Exception raised when coordinates are outside the raster bounds."""
     pass
 
-def datetime_to_SturmWaterYear(dates: pd.Series | np.ndarray | List[str | pd.Timestamp], origin: int = 10) -> np.ndarray:
+def datetime_to_SturmWaterYear(dates: pd.Series | np.ndarray | list[str | pd.Timestamp], origin: int = 10) -> np.ndarray:
     """
     
     A function to convert a series of datetime or pandas Timestamp objects to a day of year (DOY) number using Sturm et al. (2010) algorithm. 
@@ -53,92 +51,48 @@ def datetime_to_SturmWaterYear(dates: pd.Series | np.ndarray | List[str | pd.Tim
 
     # Adjust DOY based on the month condition and handle the range specifically for the Sturm algorithm
     adjusted_doys = np.where(valid_months_mask, doys, np.nan)
+    adjusted_doys = np.where(adjusted_doys>=0, adjusted_doys+1, adjusted_doys)
 
     return adjusted_doys
 
 
-def datetime_to_SturmWaterYear(date: datetime.datetime | pd.Timestamp, origin: int =10) -> int | float:
-        """
-        A function to convert a datetime or pandas Timestamp object to a day of year (DOY) number using Sturm et al. (2010) algorithm. 
-        DOI: https://doi.org/10.1175/2010JHM1202.1
-
-        Note: Sturm et al. (2010) algorithm runs from -92 (1 October) to +181 (30 June) and +182 for a leap year.
-        
-        Parameters:
-        ===========
-            * date (datetime.datetime | pd.Timestamp): The date to convert.
-        
-        Returns:
-        ========
-            * DOY (int | float): The day of the water year or np.nan for dates between July 1 and September 30.
-                                 The np.nan is specifically returned for dates that fall outside the defined operational range of the Sturm algorithm.
-        """
-        
-        # determine if the month is valid for the algorithm
-        if 7 <= date.month < 10:
-            return np.nan
-        
-        # Normalize date to UTC
-        if isinstance(date, pd.Timestamp):
-            if date.tzinfo is not None:
-                date = date.tz_convert('UTC')
-            else:
-                date = date.tz_localize('UTC')
-        else:
-            if date.tzinfo is not None:
-                date = date.astimezone(datetime.timezone.utc)
-            else:
-                date = date.replace(tzinfo=datetime.timezone.utc)
-        
-        # Determine the reference date
-        reference = datetime.datetime(date.year if date.month < origin else date.year + 1, 1, 1, tzinfo=datetime.timezone.utc)
-        
-        # Calculate the day of the year offset from the reference date
-        delta = date - reference
-
-        DOY = delta.days
-
-        # Handle the skipping of 0 by adjusting DOY accordingly
-        if DOY >= 0:
-            DOY += 1
-        
-        return DOY
-    
-
-def datetime_to_WaterYear(date: datetime.datetime | pd.Timestamp, origin : int = 10) -> int:
+def datetime_to_WaterYear(dates: pd.Series | np.ndarray | list[str | pd.Timestamp], origin: int = 10) -> np.ndarray:
     """
-    A function to convert a datetime or pandas Timestamp object to a day of year number where the origin is DOY 1.
-    The origin defaults to October 1st.
     
+    A function to convert a series of datetime or pandas Timestamp objects to a day of year (DOY) number uwhere the origin is DOY 1. 
+
     Parameters:
     ===========
-        * date (datetime.datetime | pd.Timestamp): The date to convert.
-    
+        * dates (pd.Series | np.ndarray | list[str | pd.Timestamp]): The series of dates to convert.
+        * origin (int): The month that defines the start of the water year (defaults to October).
+
     Returns:
     ========
-        * DOY (int): The day of the water year.
+        * np.ndarray: The days of the water year.
     """
-
-    # Normalize date to UTC
-    if isinstance(date, pd.Timestamp):
-        if date.tzinfo is not None:
-            date = date.tz_convert('UTC')
-        else:
-            date = date.tz_localize('UTC')
-    else:
-        if date.tzinfo is not None:
-            date = date.astimezone(datetime.timezone.utc)
-        else:
-            date = date.replace(tzinfo=datetime.timezone.utc)
-
-
-    # Determine the start of the water year
-    water_year_start = datetime.datetime(date.year if date.month >= origin else date.year - 1, origin, 1, tzinfo=datetime.timezone.utc)
     
-    # Calculate the day of the year offset from October 1
-    DOY = (date - water_year_start).days + 1
+    # Ensure the input is a pd.Series
+    if not isinstance(dates, pd.Series):
+        dates = pd.Series(dates)
     
-    return DOY
+    # Convert to datetime if not already
+    dates = pd.to_datetime(dates, errors='coerce')
+
+
+    # Calculate reference date for each date based on whether the date's month is before or after October
+    years_adjusted = np.where(dates.dt.month >= origin, dates.dt.year, dates.dt.year-1)
+
+    reference_dates = pd.to_datetime({
+        'year': years_adjusted,
+        'month': np.full_like(years_adjusted, origin),
+        'day': np.full_like(years_adjusted, 1)
+    })
+
+    # Calculate the DOY from the reference date
+    doys = (dates - reference_dates).dt.days + 1
+
+    return doys.to_numpy()
+
 
 def get_cache_path(filename: str):
     """
