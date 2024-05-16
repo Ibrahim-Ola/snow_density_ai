@@ -9,8 +9,7 @@ Email: ibrahimolalekana@u.boisestate.edu
 Institution: Boise State University (CryoGars Lab)
 """
 
-## Import libraries
-import datetime
+
 import rioxarray
 import numpy as np
 import pandas as pd
@@ -34,7 +33,7 @@ class ConvertData:
         pass
 
     @staticmethod
-    def date_to_DOY(date: datetime.datetime | pd.Timestamp, origin: int = 10, algorithm: str = "default") -> int | float:
+    def date_to_DOY(dates: pd.Series | np.ndarray | list[str | pd.Timestamp], origin: int = 10, algorithm: str = "default") -> int | float:
         """
         A function to convert a datetime or pandas Timestamp object to a day of year (DOY) number.
         
@@ -49,14 +48,14 @@ class ConvertData:
             * DOY (int | float): The day of the water year, or np.nan for dates outside the valid months.
         """
 
-        if not isinstance(date, (datetime.datetime, pd.Timestamp)):
-            raise TypeError(f"Expected date to be a datetime.datetime or pd.Timestamp, got {type(date).__name__} instead.")
+        if not isinstance(dates, pd.Series):
+            dates = pd.Series(dates)
         
         if algorithm == "default":
-            return datetime_to_WaterYear(date, origin)
+            return datetime_to_WaterYear(dates=dates, origin=origin)
         
         elif algorithm == "Sturm":
-            return datetime_to_SturmWaterYear(date, origin)
+            return datetime_to_SturmWaterYear(dates=dates, origin=origin)
 
         else:
             raise ValueError("Invalid algorithm. Choose between 'default' and 'Sturm'.")
