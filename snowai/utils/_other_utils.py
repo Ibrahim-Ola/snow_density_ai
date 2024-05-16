@@ -4,11 +4,58 @@ import gdown
 import datetime
 import numpy as np
 import pandas as pd
+from typing import List
 from platformdirs import user_cache_dir
 
 class OutOfBoundsError(Exception):
     """Exception raised when coordinates are outside the raster bounds."""
     pass
+
+def datetime_to_SturmWaterYear(dates: pd.Series | np.ndarray | List[str | pd.Timestamp], origin: int = 10) -> np.ndarray:
+    """
+    
+    A function to convert a series of datetime or pandas Timestamp objects to a day of year (DOY) number using Sturm et al. (2010) algorithm. 
+        DOI: https://doi.org/10.1175/2010JHM1202.1
+    
+     Note: Sturm et al. (2010) algorithm runs from -92 (1 October) to +181 (30 June) and +182 for a leap year.
+
+    Parameters:
+    ===========
+        * dates (pd.Series | np.ndarray | list[str | pd.Timestamp]): The series of dates to convert.
+        * origin (int): The month that defines the start of the water year (defaults to October).
+
+    Returns:
+    ========
+        * np.ndarray: The days of the water year or np.nan for dates between July 1 and September 30.
+    """
+    
+    # Ensure the input is a pd.Series
+    if not isinstance(dates, pd.Series):
+        dates = pd.Series(dates)
+    
+    # Convert to datetime if not already
+    dates = pd.to_datetime(dates, errors='coerce')
+
+
+    # Exclude dates in July, August, and September
+    valid_months_mask = ~dates.dt.month.isin([7, 8, 9])
+
+    # Calculate reference date for each date based on whether the date's month is before or after October
+    years_adjusted = np.where(dates.dt.month >= origin, dates.dt.year + 1, dates.dt.year)
+    reference_dates = pd.to_datetime({
+        'year': years_adjusted,
+        'month': np.full_like(years_adjusted, 1),
+        'day': np.full_like(years_adjusted, 1)
+    })
+
+    # Calculate the DOY from the reference date
+    doys = (dates - reference_dates).dt.days
+
+    # Adjust DOY based on the month condition and handle the range specifically for the Sturm algorithm
+    adjusted_doys = np.where(valid_months_mask, doys, np.nan)
+
+    return adjusted_doys
+
 
 def datetime_to_SturmWaterYear(date: datetime.datetime | pd.Timestamp, origin: int =10) -> int | float:
         """
