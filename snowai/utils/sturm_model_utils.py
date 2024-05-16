@@ -54,15 +54,34 @@ sturm_model_params ={
     'taiga': taiga_params
 }
 
-def validate_snow_class(snow_class: str) -> str:
+def validate_snow_class(snow_classes: np.ndarray | list | pd.Series) -> np.ndarray:
     """
-    A function to validate the snow class.
+    A function to validate snow classes. This function accepts numpy arrays, lists, or pandas Series of snow classes and returns an array of validated snow classes.
+    It consistently returns a numpy array regardless of the input type.
+
+    Parameters:
+    ===========
+        * snow_classes (np.ndarray | list | pd.Series): Array, list, or Series of snow classes as strings.
+
+    Returns:
+    ========
+        * np.ndarray: Array where valid classes are returned in lowercase and invalid classes are replaced with np.nan.
     """
 
-    if snow_class.lower() not in (s.lower() for s in VALID_SNOW_CLASSES):
-        return np.nan
-    return snow_class.lower()
+    # Convert input to a NumPy array if it isn't already (handles lists and pandas Series seamlessly)
+    if not isinstance(snow_classes, np.ndarray):
+        snow_classes = np.asarray(snow_classes, dtype=str)
 
+    # Convert all entries to lowercase
+    lower_classes = np.char.lower(snow_classes)
+
+    # Create a mask of valid entries
+    valid_mask = np.isin(lower_classes, [s.lower() for s in VALID_SNOW_CLASSES])
+
+    # Apply mask and replace invalid entries with np.nan
+    validated_classes = np.where(valid_mask, lower_classes, np.nan)
+
+    return validated_classes
 
 def validate_SturmDOY(x: int | float | str | pd.Timestamp | datetime.datetime) -> int | float:
     """
