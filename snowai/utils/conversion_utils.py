@@ -141,7 +141,7 @@ class ConvertData:
     
     
     @staticmethod
-    def get_snow_class(lons: np.ndarray, lats: np.ndarray, raster: xr.DataArray) -> np.ndarray:
+    def get_snow_class(lons: np.ndarray | pd.Series, lats: np.ndarray | pd.Series, raster: xr.DataArray = None) -> np.ndarray:
         
         """
         Get the snow class for given longitudes and latitudes.
@@ -168,6 +168,12 @@ class ConvertData:
                 raster.attrs['flag_values'],
                 raster.attrs['flag_meanings'].split(' '))
         )
+
+        # Convert pandas Series to numpy arrays if necessary
+        if isinstance(lons, pd.Series):
+            lons = lons.to_numpy()
+        if isinstance(lats, pd.Series):
+            lats = lats.to_numpy()
 
         # Transform coordinates to the raster CRS
         transformer = Transformer.from_crs(crs_from="epsg:4326", crs_to=raster.rio.crs, always_xy=True)
