@@ -4,4 +4,5 @@ pandas==2.2.2
 pyproj==3.6.1
 xgboost==2.0.3
 rioxarray==0.15.5
+scikit-learn==1.4.2
 platformdirs==4.2.1
