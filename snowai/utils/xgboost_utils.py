@@ -1,9 +1,23 @@
 
-import datetime
+import dill
 import numpy as np
 import pandas as pd
 from .conversion_utils import ConvertData
-from ._other_utils import OutOfBoundsError, get_cache_path, ensure_file_available
+from ._other_utils import get_cache_path, ensure_file_available
+
+
+categorical_feature=['Snow_Class']
+numeric_features=['Elevation', 'Snow_Depth', 'TAVG', 'TMIN', 'TMAX', 'DOY']
+
+def load_preprocessor():
+    """
+    Loads the preprocessing pipeline.
+    """
+
+    with open('./preprocessor/preprocessing_pipeline.pkl', 'rb') as f:
+        preprocessor = dill.load(f)
+
+    return preprocessor
 
 
 def download_model():
