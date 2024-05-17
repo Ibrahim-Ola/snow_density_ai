@@ -13,6 +13,7 @@ Institution: Boise State University (CryoGars Lab)
 import rioxarray
 import numpy as np
 import pandas as pd
+import xarray as xr
 from pyproj import Transformer
 from ._other_utils import (
     get_cache_path,
@@ -33,7 +34,7 @@ class ConvertData:
         pass
 
     @staticmethod
-    def date_to_DOY(dates: pd.Series | np.ndarray | list[str | pd.Timestamp], origin: int = 10, algorithm: str = "default") -> int | float:
+    def date_to_DOY(dates: pd.Series | np.ndarray | list[str | pd.Timestamp], origin: int = 10, algorithm: str = "default") -> np.ndarray:
         """
         A function to convert a datetime or pandas Timestamp object to a day of year (DOY) number.
         
@@ -61,37 +62,41 @@ class ConvertData:
             raise ValueError("Invalid algorithm. Choose between 'default' and 'Sturm'.")
 
     @staticmethod
-    def fah_to_cel(temp_in_fahrenheit: float) -> float:
+    def fah_to_cel(temp_in_fahrenheit: float | list[float] | np.ndarray) -> np.ndarray:
 
         """
         Converts fahrenheit to celsius
         
         Parameters:
         ===========
-            * temp_in_fahrenheit (float): temperature in fahrenheit.
+            * temp_in_fahrenheit (float | list[float] | np.ndarray): temperature in fahrenheit.
 
         Returns:
         ========
             * temp_in_celsius (float): temperature in celsius.
         """
 
+        # Convert input to a numpy array if it isn't already one
+        if not isinstance(temp_in_fahrenheit, np.ndarray):
+            temp_in_fahrenheit = np.array(temp_in_fahrenheit)
+
         temp_in_celsius = (temp_in_fahrenheit - 32) * (5/9)
 
         return temp_in_celsius
 
     @staticmethod
-    def inches_to_metric(inches: float, unit: str) -> float:
+    def inches_to_metric(inches: float | list[float] | np.ndarray, unit: str) -> np.ndarray:
         """
         Converts inches to a specified metric unit (meters, cm, or mm).
         
         Parameters:
         ===========
-            * inches (float): The measurement in inches to convert.
+            * inches (float | list[float] | np.ndarray): The measurement in inches to convert.
             * unit (str): The unit to convert to ("meters", "cm", or "mm").
         
         Returns:
         ========
-            * float: The converted measurement in the specified unit.
+            * np.ndarray: The converted measurement in the specified unit.
         
         Raises:
         =======
@@ -106,45 +111,50 @@ class ConvertData:
         if unit not in conversion_factors:
             raise ValueError(f"Invalid unit. Choose 'meters', 'cm', or 'mm'.")
         
+        # Convert input to a numpy array if it isn't already one
+        if not isinstance(inches, np.ndarray):
+            inches = np.array(inches)
+        
         # Calculate the conversion
         return inches * conversion_factors[unit]
 
     
     
     @staticmethod
-    def feet_to_m(measurement_in_feet: float) -> float:
-
+    def feet_to_m(measurement_in_feet: float | list[float] | np.ndarray) -> np.ndarray:
         """
-        Converts feet to meters
-        
+        Converts feet to meters.
+
         Parameters:
         ===========
-            * measurement_in_feet (float): measurement in feet.
+            * measurement_in_feet: Can be a single float, a list of floats, or a numpy ndarray of floats.
 
         Returns:
         ========
-            * measurement_in_m (float): measurement in meters.
+            * measurement_in_m: Measurement in meters, corresponding to the input dimensions, as a numpy ndarray.
         """
+        # Convert input to a numpy array if it isn't already one
+        if not isinstance(measurement_in_feet, np.ndarray):
+            measurement_in_feet = np.array(measurement_in_feet)
 
-        measurement_in_m = measurement_in_feet * 0.3048
-
-        return measurement_in_m
+        return measurement_in_feet * 0.3048
+    
     
     @staticmethod
-    def get_snow_class(lon: float, lat: float, raster: None) -> str:
+    def get_snow_class(lons: np.ndarray, lats: np.ndarray, raster: xr.DataArray) -> np.ndarray:
         
         """
-        Get the snow class for a given longitude and latitude.
+        Get the snow class for given longitudes and latitudes.
 
         Parameters:
         ===========
-            * lon (float): Longitude of the SNOTEL site.
-            * lat (float): Latitude of the SNOTEL site.
-            * raster (xr.core.dataarray.DataArray): The pre-loaded snow classification raster.
+            * lons (np.ndarray): Longitudes of the SNOTEL sites.
+            * lats (np.ndarray): Latitudes of the SNOTEL sites.
+            * raster (xr.DataArray): The pre-loaded snow classification raster.
 
         Returns:
         ========
-            * str: Snow class based on the closest pixel's value or raises an OutOfBoundsError if coordinates are outside the raster bounds.
+            * np.ndarray: Snow classes based on the closest pixels' values or raises a OutOfBoundsError if coordinates are outside the raster bounds.
         """
 
 
@@ -161,24 +171,25 @@ class ConvertData:
 
         # Transform coordinates to the raster CRS
         transformer = Transformer.from_crs(crs_from="epsg:4326", crs_to=raster.rio.crs, always_xy=True)
-        x, y = transformer.transform(xx=lon, yy=lat)
+        xs, ys = transformer.transform(xx=lons, yy=lats)
 
         # Check if the transformed coordinates are within the raster bounds
-        if not (raster.x.min().item() <= x <= raster.x.max().item()) or not (raster.y.min().item() <= y <= raster.y.max().item()):
-            raise OutOfBoundsError("Provided coordinates are outside the raster bounds.")
-
+        if np.any(xs < raster.x.min().item()) or np.any(xs > raster.x.max().item()) or np.any(ys < raster.y.min().item()) or np.any(ys > raster.y.max().item()):
+            raise OutOfBoundsError("Some provided coordinates are outside North America.")
+        
+        
         # Sample the raster at the given coordinates
-        snow_class = raster.sel(x=x, y=y, method="nearest").values[0]
+        snow_classes = raster.sel(x=xr.DataArray(xs, dims='points'), y=xr.DataArray(ys, dims='points'), method="nearest").values[0]
 
-        # Return the snow class
-        current_snow_class = snow_class_dict[float(snow_class)]
+        # Map snow classes to understandable labels
+        snow_classes_mapped = np.vectorize(lambda sc: snow_class_dict[float(sc)])(snow_classes)
 
         new_old_mappings = {
             "montane_forest": "alpine",
             "boreal_forest": "taiga"
         }
 
-        if current_snow_class in new_old_mappings.keys():
-            current_snow_class = new_old_mappings[current_snow_class]
+        vectorized_mapping = np.vectorize(lambda sc: new_old_mappings.get(sc, sc))
+        updated_snow_classes = vectorized_mapping(snow_classes_mapped)
 
-        return current_snow_class
+        return updated_snow_classes.ravel()
