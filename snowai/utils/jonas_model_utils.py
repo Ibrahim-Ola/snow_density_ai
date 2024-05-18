@@ -1,3 +1,6 @@
+
+import numpy as np
+
 ## Set Model Params
 
 jonas_model_params = {
@@ -30,36 +33,34 @@ MONTH_MAPPING = {
 
 
 ## Validate Month
-def validate_month(month: str) -> str:
+def validate_month(months: pd.Series | np.ndarray | list) -> np.ndarray:
+
     """
-    A function to validate the month. It accepts both numeric and short string representations.
+    Validate and normalize month names.
+
+    This function takes a list, numpy array, or pandas Series of month names or numbers,
+    normalizes them to lowercase full month names, and replaces invalid entries with NaN.
+
+    Parameters:
+    ===========
+    months (pd.Series | np.ndarray | list): Input month names or numbers.
+
+    Returns:
+    ========
+    np.ndarray: Validated and normalized month names with invalid entries replaced by np.nan.
     """
-    
-    # Convert numeric inputs to strings if necessary
-    if isinstance(month, int):
-        if 1 <= month <= 12:
-            month = str(month)
-        else:
-            raise ValueError(f"Invalid month! Month integer must be between 1 and 12.")
 
-    # Ensure the input is a string for further processing
-    elif isinstance(month, str):
-        month = month.strip().lower()  # Clean up the input string
+    if not isinstance(months, pd.Series):
+        months = pd.Series(months)
 
-        if month.isdigit():
-            if 1 <= int(month) <= 12:
-                month = str(int(month))
-            else:
-                raise ValueError(f"Invalid month! Month integer must be between 1 and 12.")
+    normalized_months=(
+        months
+        .astype(str)
+        .str.lower()
+        .replace(MONTH_MAPPING)
+    )
 
-    else:
-        raise ValueError(f"Month input must be an integer or string.")
-    
-    if month in MONTH_MAPPING:
-        return MONTH_MAPPING[month]
+    valid_months = normalized_months.isin(MONTH_MAPPING.values())
+    validated_months = np.where(valid_months, normalized_months, np.nan)
 
-    elif month in MONTH_MAPPING.values():
-        return month
-
-    else:
-        raise ValueError(f"Invalid month! Please choose from: {', '.join(MONTH_MAPPING.keys())} or {', '.join(list(MONTH_MAPPING.values())[:12])}.")
+    return validated_months
