@@ -29,18 +29,20 @@ class SturmDensity:
     A class for computing snow density using the Sturm Equation.
     """
 
-    def __init__(self):
-        pass
+    def __init__(self, return_type: str = 'numpy'):
+        """Initialize the SturmDensity class."""
+        
+        self.return_type = return_type
 
-    def rho(self, h, doy, rho_max, rho_0, k1, k2):
+    def rho(self, h: np.ndarray, doy: np.ndarray, rho_max: int, rho_0: int, k1: int, k2: int) -> np.ndarray:
 
         """
         A function to compute snow density using the Sturm Equation.
 
         Parameters:
         ===========
-            * h (float): The snow depth in cm.
-            * doy (int): The day of the year. See link to original paper in the preamble for more information on how to compute doy. 
+            * h (np.ndarray): The snow depth in cm.
+            * doy (np.ndarray): The day of the year. See link to original paper in the preamble for more information on how to compute doy. 
             * rho_max (float): A constant in g/cm^3. See link to original paper in the preamble.
             * rho_0 (float): A constant in g/cm^3. See link to original paper in the preamble.
             * k1 (float): A constant. See link to original paper in the preamble.
@@ -48,16 +50,17 @@ class SturmDensity:
 
         Returns:
         ========
-            * The function returns the snow density in kg/m^3.
+            * np.ndarray: The function returns the snow density in kg/m^3.
         """
 
         density_est = (rho_max - rho_0) * (1 - np.exp(-k1 * h - k2 * doy)) + rho_0
         return density_est
 
     def predict(
-        self, 
-        snow_depth: float, 
-        DOY: int | float | str | pd.Timestamp | datetime.datetime, 
+        self,
+        data: pd.DataFrame, 
+        snow_depth: str, 
+        DOY: str, 
         snow_class: str
     ) -> float:
 
@@ -66,13 +69,14 @@ class SturmDensity:
 
         Parameters:
         ===========
-            * snow_depth (float): The snow depth in cm.
-            * DOY (int | float | str | pd.Timestamp | datetime.datetime): The day of the year. See link to original paper in the preamble for more information on how to compute DOY. 
-            * snow_class (str): The snow type. Must be one of 'alpine', 'maritime', 'prairie', 'tundra' or 'taiga'.
+            * data (pd.DataFrame): Input dataset containing the required columns.
+            * snow_depth (str): Column name for snow depth in cm.
+            * DOY (str): The column name for the day of the year.  See link to original paper in the preamble for more information on how to compute DOY. 
+            * snow_class (str): The column name for the snow type. Must be one of 'alpine', 'maritime', 'prairie', 'tundra' or 'taiga'.
 
         Returns:
         ========
-            * The function returns the snow density in g/cm^3 or raises a ValueError if the snow class is not found.
+            * np.ndarray or pd.Series: The snow density in g/cm^3
         """
 
 
