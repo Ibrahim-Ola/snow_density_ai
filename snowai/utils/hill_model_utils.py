@@ -47,7 +47,7 @@ def swe_acc_and_abl(
     return {'swe_acc': swe_acc, 'swe_abl': swe_abl}
     
 
-def SWE_Hill(swe_acc: np.ndarray, swe_abl: np.ndarray, DOY: int, DOY_: int = 180) -> np.ndarray:
+def SWE_Hill(swe_acc: np.ndarray, swe_abl: np.ndarray, DOY: np.ndarray, DOY_: int = 180) -> np.ndarray:
     """
     Compute the snow water equivalent on a particular day using Hill et al. (2019)'s model.
 
