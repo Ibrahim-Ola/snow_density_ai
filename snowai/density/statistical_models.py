@@ -79,17 +79,24 @@ class SturmDensity:
             * np.ndarray or pd.Series: The snow density in g/cm^3
         """
 
+        #vaidate return type
+        if self.return_type.lower() not in ['numpy', 'pandas']:
+            raise ValueError("Invalid return type. Must be either 'numpy' or 'pandas'.")
 
-        # TODO: Remove the first check in the final package.
-
-        if pd.isna(DOY):
-            return np.nan
+        ## Extract the required columns
+        try:
+            snow_depth = data[snow_depth].to_numpy()
+            DOY = data[DOY].to_numpy()
+            snow_class = data[snow_class].to_numpy()
+        except KeyError as e:
+            raise ValueError(f"Missing required column: {e.args[0]}")
+        
+        # Check for NaN values in the extracted columns
+        if np.isnan(snow_depth).any() or np.isnan(DOY).any() or np.isnan(snow_class).any():
+            raise ValueError("Input data contains NaN values.")
 
         snow_class = validate_snow_class(snow_class)
         DOY = validate_SturmDOY(DOY)
-
-        if DOY is np.nan or snow_class is np.nan:
-            return np.nan
 
 
         density = self.rho(
@@ -101,7 +108,10 @@ class SturmDensity:
                 k2=sturm_model_params[snow_class]['k2']
             )
         
-        return density
+        if self.return_type.lower() == 'numpy':
+            return density
+        else:
+            return pd.Series(density, index=data.index)
     
 class JonasDensity:
 
@@ -109,8 +119,10 @@ class JonasDensity:
     A class for computing snow density using the Jonas Model.
     """
 
-    def __init__(self):
-        pass
+    def __init__(self, return_type: str = 'numpy'):
+        """Initialize the JonasDensity class."""
+        
+        self.return_type = return_type
 
     def rho(self, h, a, b):
 
@@ -132,57 +144,92 @@ class JonasDensity:
         return density_est
 
     def predict(
-        self, 
-        snow_depth: float,
+        self,
+        data: pd.DataFrame, 
+        snow_depth: str,
         month: str,
-        elevation: float
-    ) -> float:
+        elevation: str
+    ) -> np.ndarray | pd.Series:
 
         """
         A function to compute snow density using the Jonas Model.
 
         Parameters:
         ===========
-            * snow_depth (float): The snow depth in meters.
-            * month (str): The month. Must be one of 'jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov' or 'dec'.
-            * elevation (float): The elevation in meters.
+            * data (pd.DataFrame): Input dataset containing the required columns.
+            * snow_depth (str): Column name for snow depth in cm.
+            * month (str): The column name for the month.
+            * elevation (str): The column name for the elevation in meters.
 
         Returns:
         ========
             * The function returns the snow density in g/cm^3.
         """
-        
-        if elevation < 1400:
-            elevation_ = '<1400m'
-        elif elevation >= 1400 and elevation < 2000:
-            elevation_ = '[1400, 2000)m'
-        else:
-            elevation_ = '>=2000m'
 
+        #vaidate return type
+        if self.return_type.lower() not in ['numpy', 'pandas']:
+            raise ValueError("Invalid return type. Must be either 'numpy' or 'pandas'.")
+        
+        ## Extract the required columns
+        try:
+            snow_depth = data[snow_depth].to_numpy()
+            month = data[month].to_numpy()
+            elevation = data[elevation].to_numpy()
+        except KeyError as e:
+            raise ValueError(f"Missing required column: {e.args[0]}")
+        
+        # Check for NaN values in the extracted columns
+        if np.isnan(snow_depth).any() or np.isnan(month).any() or np.isnan(elevation).any():
+            raise ValueError("Input data contains NaN values.")
+        
+
+        # Validate month
         month = validate_month(month)
 
-        a = jonas_model_params[month][elevation_]['a']
-        b = jonas_model_params[month][elevation_]['b']
+        elevation_ = np.where(
+            elevation < 1400, '<1400m',
+            np.where(elevation < 2000, '[1400, 2000)m', '>=2000m')
+        )
 
-        if a is None or b is None:
-            return np.nan
+        # Initialize arrays for parameters a and b
+        a = np.full_like(month, np.nan, dtype=float)
+        b = np.full_like(month, np.nan, dtype=float)
 
-        else:
-            density = self.rho(
-                h=snow_depth,
-                a=a,
-                b=b
-            )
-    
+        # Create a function to map parameters
+        def get_params(month, elev_cat):
+            if pd.isna(month) or month not in jonas_model_params:
+                return np.nan, np.nan
+            params = jonas_model_params[month][elev_cat]
+            return params['a'], params['b']
+
+        # Vectorize the get_params function
+        vec_get_params = np.vectorize(get_params, otypes=[float, float])
+
+        # Apply the function to get a and b
+        a, b = vec_get_params(month, elevation_)
+
+        # Compute density
+        density = self.rho(
+            h=snow_depth,
+            a=a,
+            b=b
+        )
+
+        density /= 1000  # Convert to g/cm^3
         
-        return density/1000
+        if self.return_type.lower() == 'numpy':
+            return density
+        else:
+            return pd.Series(density, index=data.index)
     
 class PistochiDensity:
 
-    def __init__(self):
-        pass
+    def __init__(self, return_type: str = 'numpy'):
+        """Initialize the PistochiDensity class."""
+        
+        self.return_type = return_type
 
-    def predict(self, DOY: int | float | str | pd.Timestamp | datetime.datetime) -> float:
+    def predict(self, data: pd.DataFrame, DOY: str) -> float:
 
         """
         A function to compute snow density using the Pistochi Model.
@@ -195,6 +242,27 @@ class PistochiDensity:
         ========
             * The function returns the snow density in g/cm^3.
         """
+
+        #vaidate return type
+        if self.return_type.lower() not in ['numpy', 'pandas']:
+            raise ValueError("Invalid return type. Must be either 'numpy' or 'pandas'.")
+
+        ## Extract the required columns
+        try:
+            DOY = data[DOY].to_numpy()
+        except KeyError as e:
+            raise ValueError(f"Missing required column: {e.args[0]}")
+        
+        # Check for NaN values in the extracted columns
+        if np.isnan(DOY).any():
+            raise ValueError("Input data contains NaN values.")
+        
+
         DOY = validate_DOY(DOY, origin=11)
         density_est = 200 + (DOY + 61)
-        return density_est/1000    
+
+        if self.return_type.lower() == 'numpy':
+            return density_est/1000
+        
+        else:
+            return pd.Series(density_est/1000, index=data.index)
