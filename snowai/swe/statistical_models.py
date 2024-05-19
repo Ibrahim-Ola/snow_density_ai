@@ -17,7 +17,7 @@ Institution: Boise State University
 ## Import libraries
 import numpy as np
 import pandas as pd
-from typing import Optional, Any
+from typing import Union, Any
 from ..utils.hill_model_utils import swe_acc_and_abl, SWE_Hill
 from ..density import (
     SturmDensity, 
@@ -27,40 +27,59 @@ from ..density import (
 
 
 class HillSWE:
-    def __init__(self):
+    def __init__(self, return_type: str = 'numpy'):
         """Initialize the HillSWE class."""
-        pass
+        
+        self.return_type = return_type
 
-    def predict(self, pptwt: float, TD: float, DOY: int, snow_depth: float) -> Optional[float]:
+    def predict(self, data: pd.DataFrame, pptwt: str, TD: str, DOY: str, snow_depth: str, DOY_ : int = 180) -> Union[np.ndarray, pd.Series]:
         """
         Compute the snow water equivalent (SWE) based on precipitation weight, temperature difference, day of the year, and height or depth parameter.
 
         Parameters:
         ===========
-            * pptwt (float): Winter precipitation in mm.
-            * TD (float): Temperature difference degree celcius.
-            * DOY (int): Day of the year (with October 1 as the origin).
-            * snow_depth (float): Snow depth in mm.
+            * data (pd.DataFrame): Input dataset containing the required columns.
+            * pptwt (str): Column name for winter precipitation in mm.
+            * TD (str): Column name for temperature difference in degree Celsius.
+            * DOY (str): Column name for day of the year (with October 1 as the origin).
+            * snow_depth (str): Column name for snow depth in mm.
+            * DOY_ (int): Day of peak SWE, default is 180.
 
         Returns:
         ========
-            * Optional[float]: The computed snow water equivalent (cm) as a float, or None if any input is NaN.
-
-        Raises:
-        =======
-            ValueError: If any of the inputs are not valid (e.g., NaN values).
+             * np.ndarray or pd.Series: An array or series of computed snow water equivalent (cm) values.
         """
-        # Check if any input is missing or not a number, return None if so
-        if pd.isna(pptwt) or pd.isna(TD) or pd.isna(DOY) or pd.isna(snow_depth):
-            return None  
+
+        # Validate return_type
+        if self.return_type.lower() not in ['numpy', 'pandas']:
+            raise ValueError("Invalid return type. Choose either 'numpy' or 'pandas'.")
+        
+        try:
+            pptwt = data[pptwt].to_numpy()
+            TD = data[TD].to_numpy()
+            DOY = data[DOY].to_numpy()
+            snow_depth = data[snow_depth].to_numpy()
+        except KeyError as e:
+            raise ValueError(f"Missing required column: {e.args[0]}")
+        
+        
+        # Check for NaN values in the extracted columns
+        if np.isnan(pptwt).any() or np.isnan(TD).any() or np.isnan(DOY).any() or np.isnan(snow_depth).any():
+            raise ValueError("Input data contains NaN values.")  
 
         # Calculate accumulated and ablated SWE using provided formulas
-        swe_preds = swe_acc_and_abl(pptwt, TD, DOY, snow_depth)
+        swe_preds = swe_acc_and_abl(pptwt=pptwt, TD=TD, DOY=DOY, h=snow_depth)
 
         # Calculate final SWE using the Hill model
-        swe = SWE_Hill(swe_preds['swe_acc'], swe_preds['swe_abl'], DOY)
+        swe = SWE_Hill(swe_acc=swe_preds['swe_acc'], swe_abl=swe_preds['swe_abl'], DOY=DOY, DOY_=DOY_)
+        
+        swe_cm = swe / 10  # Adjusted to convert to cm (orginally in mm)
 
-        return swe / 10  # Adjusted to convert to cm (orginally in mm)
+        if self.return_type.lower() == 'numpy':
+            return swe_cm
+        else:
+            return pd.Series(swe_cm, index=data.index)
+
 
 
 class StatisticalModels(HillSWE):
