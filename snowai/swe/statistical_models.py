@@ -96,32 +96,36 @@ class StatisticalModels(HillSWE):
         self.algorithm = algorithm
         self.kwargs = kwargs
 
-    def predict(self) -> float:
+    def predict(self) -> np.ndarray | pd.Series:
         """
         Calculate the snow water equivalent (SWE) based on the chosen algorithm and parameters.
 
         Returns:
         ========
-            * float: The calculated snow water equivalent.
+            * np.ndarray or pd.Series: An array or series of computed snow water equivalent (cm) values.
 
         Raises:
         =======
             * ValueError: If an unsupported algorithm is specified.
         """
+
         if self.algorithm.lower() == 'default':
             depth = self.kwargs.get('snow_depth', np.nan)
             density = self.kwargs.get('snow_density', np.nan)
             return self.default_SWE(depth, density)
         
-        elif self.algorithm.lower() == 'hill':
+        if self.algorithm.lower() == 'hill':
             return super().predict(**self.kwargs)
         
         elif self.algorithm.lower() == 'sturm':
-            depth = self.kwargs.get('snow_depth', np.nan)
-            DOY = self.kwargs.get('DOY', np.nan)
-            snow_class = self.kwargs.get('snow_class', np.nan)
-            density = SturmDensity().predict(snow_depth=depth, DOY=DOY, snow_class=snow_class)
-            return self.default_SWE(depth, density)
+
+            data= self.kwargs.get('data', None)
+
+            # depth = self.kwargs.get('snow_depth', np.nan)
+            # DOY = self.kwargs.get('DOY', np.nan)
+            # snow_class = self.kwargs.get('snow_class', np.nan)
+            # density = SturmDensity().predict(snow_depth=depth, DOY=DOY, snow_class=snow_class)
+            # return self.default_SWE(depth, density)
 
         elif self.algorithm.lower() == 'jonas':
             depth = self.kwargs.get('snow_depth', np.nan)
@@ -138,17 +142,20 @@ class StatisticalModels(HillSWE):
         else:
             raise ValueError(f"Unsupported algorithm: {self.algorithm}")
 
-    def default_SWE(self, snow_depth: float, snow_density: float) -> float:
+    def default_SWE(self, snow_depth: np.ndarray, snow_density: np.ndarray) -> np.ndarray:
         """
         Calculate snow water equivalent using depth and density - the default algorithm.
 
         Parameters:
         ===========
-            * depth (float): The depth of the snow in cm.
-            * density (float): The density of the snow in g/cm^3.
+            * depth (str): snow depth in cm
+            * density (str): Csnow density in g/cm^3
 
         Returns:
         ========
-            * float: The calculated snow water equivalent.
+            * np.ndarray: An array of computed snow water equivalent (cm) values.
         """
-        return snow_depth * snow_density
+
+        # Calculate SWE using the default algorithm
+        SWE= snow_depth * snow_density
+        return SWE
