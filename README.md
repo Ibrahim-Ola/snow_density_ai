@@ -18,7 +18,7 @@ SnowDensityAI: statistical and machine learning model for snow density and snow 
 |:---:  |:---:  |:---:  |:---:  |
 | Python 3.11.5 | [https://github.com/pyenv/pyenv](https://github.com/pyenv/pyenv) | This code should work on any recent PC/Laptop | Linux (any), MacOS, Windows|
 
-## Usage
+## Installation
 
 To use this package, you need to have Python installed. I recommend using the [pyenv](https://github.com/pyenv/pyenv) utility program. `pyenv` allows you to install different versions of Python and seamlessly switch between them.
 
@@ -36,4 +36,23 @@ pyenv local 3.11.5
 python -m venv .venv
 source .venv/bin/activate
 pip install --upgrade pip
+```
+
+### 3. Clone the Repository
+
+```{bash}
+git clone https://github.com/Ibrahim-Ola/snow_density_ai.git
+cd snow_density_ai
+```
+
+### 4. Install Source Code 
+
+```{bash}
+pip install .
+```
+
+## Usage
+
+```{python}
+from snowai import density
 ```
