@@ -18,7 +18,7 @@ import numpy as np
 import pandas as pd
 from ..utils.xgboost_utils import validate_DOY
 from ..utils.jonas_model_utils import jonas_model_params, validate_month
-from ..utils.sturm_model_utils import sturm_model_params, validate_snow_class, validate_SturmDOY
+from ..utils.sturm_model_utils import sturm_model_params, validate_snow_class, validate_SturmDOY, get_sturm_params
 
 
 
@@ -86,25 +86,32 @@ class SturmDensity:
         try:
             snow_depth = data[snow_depth].to_numpy()
             DOY = data[DOY].to_numpy()
-            snow_class = data[snow_class].to_numpy()
+            snow_class = data[snow_class].to_numpy(dtype=str)
         except KeyError as e:
             raise ValueError(f"Missing required column: {e.args[0]}")
         
         # Check for NaN values in the extracted columns
-        if np.isnan(snow_depth).any() or np.isnan(DOY).any() or np.isnan(snow_class).any():
+        if pd.isna(snow_depth).any() or pd.isna(DOY).any() or pd.isna(snow_class).any():
             raise ValueError("Input data contains NaN values.")
 
         snow_class = validate_snow_class(snow_class)
         DOY = validate_SturmDOY(DOY)
 
 
+        # Vectorize the function
+        vectorized_get_params = np.vectorize(get_sturm_params, otypes=[float, float, float, float])
+
+        # Extract parameters as arrays
+        rho_max_array, rho_0_array, k1_array, k2_array = vectorized_get_params(snow_class)
+
+
         density = self.rho(
                 h=snow_depth,
                 doy=DOY,
-                rho_max=sturm_model_params[snow_class]['rho_max'],
-                rho_0=sturm_model_params[snow_class]['rho_0'],
-                k1=sturm_model_params[snow_class]['k1'],
-                k2=sturm_model_params[snow_class]['k2']
+                rho_max=rho_max_array,
+                rho_0=rho_0_array,
+                k1=k1_array,
+                k2=k2_array
             )
         
         if self.return_type.lower() == 'numpy':
