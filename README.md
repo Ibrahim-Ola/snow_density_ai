@@ -28,7 +28,7 @@ Please follow the instructions [here](https://github.com/pyenv/pyenv?tab=readme-
 
 Setup your virtual environment if you want or otherwise move to step 2.
 
-```{bash}
+```bash
 pyenv install 3.11.5
 mkdir density_preds
 cd density_preds
@@ -40,19 +40,19 @@ pip install --upgrade pip
 
 ### 3. Clone the Repository
 
-```{bash}
+```bash
 git clone https://github.com/Ibrahim-Ola/snow_density_ai.git
 cd snow_density_ai
 ```
 
 ### 4. Install Source Code 
 
-```{bash}
+```bash
 pip install .
 ```
 
 ## Usage
 
-```{python}
+```python
 from snowai import density
 ```
