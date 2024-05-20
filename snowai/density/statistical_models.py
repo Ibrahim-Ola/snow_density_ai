@@ -14,7 +14,6 @@ Institution: Boise State University
 """
 
 ## Import libraries
-import datetime
 import numpy as np
 import pandas as pd
 from ..utils.xgboost_utils import validate_DOY
