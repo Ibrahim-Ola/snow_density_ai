@@ -54,5 +54,64 @@ pip install .
 ## Usage
 
 ```python
-from snowai import density
+# Load libraries
+from snowai.density import (
+    JonasDensity, 
+    PistochiDensity, 
+    SturmDensity,
+    MachineLearningDensity
+)
+import pandas as pd
+
+# Create df
+
+date=["2012-02-06", "2017-04-27", "2007-12-27"]
+depth_cm=[30.48, 134.62, 149.86]
+month=[2, 4, 12]
+elevation_m=[652.272, 2855.976, 2743.200]
+snow_class=['Ephemeral', 'Taiga', 'Taiga']
+
+
+df_ = pd.DataFrame({
+    'date': date,
+    'depth_cm': depth_cm,
+    'month': month,
+    'elevation_m': elevation_m,
+    'snow_class': snow_class
+})
+
+df=df_.assign(depth_m = df_['depth_cm'] / 100)
+
+
+# Statistical models
+
+## Predict density using Jonas model
+
+jonas=JonasDensity(return_type='pandas')
+
+jonas.predict(
+    data=df,
+    snow_depth='depth_m',
+    month='month',
+    elevation='elevation_m'
+)
+
+# Predict density using Pistochi model
+pistochi=PistochiDensity(return_type='pandas')
+
+pistochi.predict(
+    data=df,
+    DOY='date'
+)
+
+## Predict density using Sturm model
+
+sturm=SturmDensity(return_type='pandas')
+
+sturm.predict(
+    data=df,
+    DOY='date',
+    snow_class='snow_class',
+    snow_depth='depth_cm'
+)
 ```
