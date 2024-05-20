@@ -134,14 +134,14 @@ class StatisticalModels(HillSWE):
 
         
         if self.algorithm.lower() == 'hill':
-            SWE = super().predict(data, **kwargs)
+            SWE = super().predict(data=data, **kwargs)
 
             if self.return_type.lower() == 'pandas':
                 return pd.Series(SWE, index=data.index)
             return SWE
         
         elif self.algorithm.lower() == 'sturm':
-            density = SturmDensity(return_type='numpy').predict(data, **kwargs)
+            density = SturmDensity(return_type='numpy').predict(data=data, **kwargs)
             depth = data[kwargs.get('snow_depth')].to_numpy()
 
             if self.return_type.lower() == 'pandas':
@@ -150,7 +150,7 @@ class StatisticalModels(HillSWE):
 
             
         elif self.algorithm.lower() == 'jonas':
-            density = JonasDensity(return_type='numpy').predict(data, **kwargs)
+            density = JonasDensity(return_type='numpy').predict(data=data, **kwargs)
             depth = data[kwargs.get('snow_depth')].to_numpy()
             
             if self.return_type.lower() == 'pandas':
@@ -158,7 +158,7 @@ class StatisticalModels(HillSWE):
             return self.default_SWE(depth, density)
 
         elif self.algorithm.lower() == 'pistochi':
-            density = PistochiDensity(return_type='numpy').predict(data, **kwargs)
+            density = PistochiDensity(return_type='numpy').predict(data=data, **kwargs)
             
             try:
                 depth = data[kwargs.get('snow_depth')].to_numpy()
