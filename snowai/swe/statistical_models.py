@@ -142,7 +142,7 @@ class StatisticalModels(HillSWE):
         
         elif self.algorithm.lower() == 'sturm':
             density = SturmDensity(return_type='numpy').predict(data, **kwargs)
-            depth = kwargs.get('snow_depth')
+            depth = data[kwargs.get('snow_depth')].to_numpy()
 
             if self.return_type.lower() == 'pandas':
                 return pd.Series(self.default_SWE(depth, density), index=data.index)
@@ -151,7 +151,7 @@ class StatisticalModels(HillSWE):
             
         elif self.algorithm.lower() == 'jonas':
             density = JonasDensity(return_type='numpy').predict(data, **kwargs)
-            depth = kwargs.get('snow_depth')
+            depth = data[kwargs.get('snow_depth')].to_numpy()
             
             if self.return_type.lower() == 'pandas':
                 return pd.Series(self.default_SWE(depth, density), index=data.index)
@@ -159,7 +159,7 @@ class StatisticalModels(HillSWE):
 
         elif self.algorithm.lower() == 'pistochi':
             density = PistochiDensity(return_type='numpy').predict(data, **kwargs)
-            depth = kwargs.get('snow_depth')
+            depth = data[kwargs.get('snow_depth')].to_numpy()
            
             if self.return_type.lower() == 'pandas':
                 return pd.Series(self.default_SWE(depth, density), index=data.index)
