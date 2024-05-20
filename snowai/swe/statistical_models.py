@@ -83,20 +83,24 @@ class HillSWE:
 
 
 class StatisticalModels(HillSWE):
-    def __init__(self, algorithm: str = 'default', **kwargs: Any):
+    def __init__(self, algorithm: str = 'default', return_type='numpy'):
         """
         Initialize the SWE model with a specified algorithm and additional keyword arguments.
 
         Parameters:
         ===========
             * algorithm (str): The name of the algorithm to use for SWE calculation.
-            * kwargs (Any): Additional parameters specific to each algorithm.
         """
         super().__init__()
         self.algorithm = algorithm
-        self.kwargs = kwargs
+        self.return_type = return_type
 
-    def predict(self) -> np.ndarray | pd.Series:
+    def predict(self, 
+            data: pd.DataFrame,
+            snow_depth: str = None,
+            snow_density: str = None,
+            **kwargs: Any
+        ) -> np.ndarray | pd.Series:
         """
         Calculate the snow water equivalent (SWE) based on the chosen algorithm and parameters.
 
@@ -110,38 +114,60 @@ class StatisticalModels(HillSWE):
         """
 
         if self.algorithm.lower() == 'default':
-            depth = self.kwargs.get('snow_depth', np.nan)
-            density = self.kwargs.get('snow_density', np.nan)
-            return self.default_SWE(depth, density)
+            
+            # Extract snow depth and density columns from the input data
+            try:
+                snow_depth = data[snow_depth].to_numpy()
+                snow_density = data[snow_density].to_numpy()
+            except KeyError as e:
+                raise ValueError(f"Missing required column: {e.args[0]}")
+            
+            # Check for NaN values in the extracted columns          
+            if np.isnan(snow_depth).any() or np.isnan(snow_density).any():
+                raise ValueError("Input data contains NaN values.")
+            
+            SWE = self.default_SWE(snow_depth, snow_density)
+
+            if self.return_type.lower() == 'pandas':
+                return pd.Series(SWE, index=data.index)
+            return SWE
+
         
         if self.algorithm.lower() == 'hill':
-            return super().predict(**self.kwargs)
+            SWE = super().predict(data, **kwargs)
+
+            if self.return_type.lower() == 'pandas':
+                return pd.Series(SWE, index=data.index)
+            return SWE
         
         elif self.algorithm.lower() == 'sturm':
+            density = SturmDensity().predict(data, **kwargs)
+            depth = kwargs.get('snow_depth', np.nan)
 
-            data= self.kwargs.get('data', None)
+            if self.return_type.lower() == 'pandas':
+                return pd.Series(self.default_SWE(depth, density), index=data.index)
+            return self.default_SWE(depth, density)
 
-            # depth = self.kwargs.get('snow_depth', np.nan)
-            # DOY = self.kwargs.get('DOY', np.nan)
-            # snow_class = self.kwargs.get('snow_class', np.nan)
-            # density = SturmDensity().predict(snow_depth=depth, DOY=DOY, snow_class=snow_class)
-            # return self.default_SWE(depth, density)
-
+            
         elif self.algorithm.lower() == 'jonas':
-            depth = self.kwargs.get('snow_depth', np.nan)
-            month = self.kwargs.get('month', np.nan)
-            elevation = self.kwargs.get('elevation', np.nan)
-            density = JonasDensity().predict(snow_depth=depth, month=month, elevation=elevation)
-            return self.default_SWE(depth*100, density)
+            density = JonasDensity().predict(data, **kwargs)
+            depth = kwargs.get('snow_depth', np.nan)
+            
+            if self.return_type.lower() == 'pandas':
+                return pd.Series(self.default_SWE(depth, density), index=data.index)
+            return self.default_SWE(depth, density)
 
         elif self.algorithm.lower() == 'pistochi':
-            density = PistochiDensity().predict(DOY=self.kwargs.get('DOY', np.nan))
-            depth = self.kwargs.get('snow_depth', np.nan)
+            density = PistochiDensity().predict(data, **kwargs)
+            depth = kwargs.get('snow_depth', np.nan)
+           
+            if self.return_type.lower() == 'pandas':
+                return pd.Series(self.default_SWE(depth, density), index=data.index)
             return self.default_SWE(depth, density)
         
         else:
-            raise ValueError(f"Unsupported algorithm: {self.algorithm}")
-
+            raise ValueError(f"Unsupported algorithm: {self.algorithm}. Choose either 'default', 'hill', 'sturm', 'jonas', or 'pistochi'.")
+    
     def default_SWE(self, snow_depth: np.ndarray, snow_density: np.ndarray) -> np.ndarray:
         """
         Calculate snow water equivalent using depth and density - the default algorithm.
