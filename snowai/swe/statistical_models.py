@@ -97,8 +97,8 @@ class StatisticalModels(HillSWE):
 
     def predict(self, 
             data: pd.DataFrame,
-            snow_depth: str = None,
-            snow_density: str = None,
+            depth_col: str = None,
+            density_col: str = None,
             **kwargs: Any
         ) -> np.ndarray | pd.Series:
         """
@@ -117,8 +117,8 @@ class StatisticalModels(HillSWE):
             
             # Extract snow depth and density columns from the input data
             try:
-                snow_depth = data[snow_depth].to_numpy()
-                snow_density = data[snow_density].to_numpy()
+                snow_depth = data[depth_col].to_numpy() if depth_col else data[kwargs.get('snow_depth')].to_numpy()
+                snow_density = data[density_col].to_numpy() if density_col else data[kwargs.get('snow_density')].to_numpy()
             except KeyError as e:
                 raise ValueError(f"Missing required column: {e.args[0]}")
             
@@ -141,8 +141,8 @@ class StatisticalModels(HillSWE):
             return SWE
         
         elif self.algorithm.lower() == 'sturm':
-            density = SturmDensity().predict(data, **kwargs)
-            depth = kwargs.get('snow_depth', np.nan)
+            density = SturmDensity(return_type='numpy').predict(data, **kwargs)
+            depth = kwargs.get('snow_depth')
 
             if self.return_type.lower() == 'pandas':
                 return pd.Series(self.default_SWE(depth, density), index=data.index)
@@ -150,16 +150,16 @@ class StatisticalModels(HillSWE):
 
             
         elif self.algorithm.lower() == 'jonas':
-            density = JonasDensity().predict(data, **kwargs)
-            depth = kwargs.get('snow_depth', np.nan)
+            density = JonasDensity(return_type='numpy').predict(data, **kwargs)
+            depth = kwargs.get('snow_depth')
             
             if self.return_type.lower() == 'pandas':
                 return pd.Series(self.default_SWE(depth, density), index=data.index)
             return self.default_SWE(depth, density)
 
         elif self.algorithm.lower() == 'pistochi':
-            density = PistochiDensity().predict(data, **kwargs)
-            depth = kwargs.get('snow_depth', np.nan)
+            density = PistochiDensity(return_type='numpy').predict(data, **kwargs)
+            depth = kwargs.get('snow_depth')
            
             if self.return_type.lower() == 'pandas':
                 return pd.Series(self.default_SWE(depth, density), index=data.index)
