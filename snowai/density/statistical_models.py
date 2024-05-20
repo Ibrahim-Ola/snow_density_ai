@@ -253,7 +253,7 @@ class PistochiDensity:
             raise ValueError(f"Missing required column: {e.args[0]}")
         
         # Check for NaN values in the extracted columns
-        if np.isnan(DOY).any():
+        if pd.isna(DOY).any():
             raise ValueError("Input data contains NaN values.")
         
 
