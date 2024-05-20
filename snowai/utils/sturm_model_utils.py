@@ -52,6 +52,10 @@ sturm_model_params ={
     'taiga': taiga_params
 }
 
+def get_sturm_params(snow_class):
+    params = sturm_model_params.get(snow_class, {'rho_max': np.nan, 'rho_0': np.nan, 'k1': np.nan, 'k2': np.nan})
+    return params['rho_max'], params['rho_0'], params['k1'], params['k2']
+
 def validate_snow_class(snow_classes: np.ndarray | list | pd.Series, valid_snow_class: list = VALID_SNOW_CLASSES) -> np.ndarray:
     """
     A function to validate snow classes. This function accepts numpy arrays, lists, or pandas Series of snow classes and returns an array of validated snow classes.
