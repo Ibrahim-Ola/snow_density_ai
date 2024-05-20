@@ -2,7 +2,7 @@
 import numpy as np
 import pandas as pd
 import xgboost as xgb
-from ..utils._other_utils import clean_cache
+from ..utils import clean_cache
 from ..utils.sturm_model_utils import validate_snow_class
 from ..utils.xgboost_utils import download_model, load_preprocessor, validate_DOY
 
