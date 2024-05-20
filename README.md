@@ -20,3 +20,20 @@ SnowDensityAI: statistical and machine learning model for snow density and snow 
 
 ## Usage
 
+To use this package, you need to have Python installed. I recommend using the [pyenv](https://github.com/pyenv/pyenv) utility program. `pyenv` allows you to install different versions of Python and seamlessly switch between them.
+
+### 1. Install `pyenv`
+
+Please follow the instructions [here](https://github.com/pyenv/pyenv?tab=readme-ov-file#installation) to install `pyenv` for your operation system (OS).
+
+Setup your virtual environment if you want or otherwise move to step 2.
+
+```{bash}
+pyenv install 3.11.5
+mkdir density_preds
+cd density_preds
+pyenv local 3.11.5
+python -m venv .venv
+source .venv/bin/activate
+pip install --upgrade pip
+```
