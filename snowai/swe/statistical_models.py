@@ -18,6 +18,7 @@ Institution: Boise State University
 import numpy as np
 import pandas as pd
 from typing import Union, Any
+from ..utils.xgboost_utils import validate_DOY
 from ..utils.hill_model_utils import swe_acc_and_abl, SWE_Hill
 from ..density import (
     SturmDensity, 
@@ -57,15 +58,18 @@ class HillSWE:
         try:
             pptwt = data[pptwt].to_numpy()
             TD = data[TD].to_numpy()
-            DOY = data[DOY].to_numpy()
+            DOY = data[DOY] # leaving this as a pandas series because of the validate_DOY function.
             snow_depth = data[snow_depth].to_numpy()
         except KeyError as e:
-            raise ValueError(f"Missing required column: {e.args[0]}")
+            raise ValueError(f"Column {e.args[0]} is missing in the input data.")
         
         
         # Check for NaN values in the extracted columns
-        if np.isnan(pptwt).any() or np.isnan(TD).any() or np.isnan(DOY).any() or np.isnan(snow_depth).any():
-            raise ValueError("Input data contains NaN values.")  
+        if np.isnan(pptwt).any() or np.isnan(TD).any() or pd.isna(DOY).any() or np.isnan(snow_depth).any():
+            raise ValueError("Input data contains NaN values.") 
+
+        # validate DOY 
+        DOY = validate_DOY(DOY, origin=10)
 
         # Calculate accumulated and ablated SWE using provided formulas
         swe_preds = swe_acc_and_abl(pptwt=pptwt, TD=TD, DOY=DOY, h=snow_depth)
@@ -120,7 +124,7 @@ class StatisticalModels(HillSWE):
                 snow_depth = data[depth_col].to_numpy() if depth_col else data[kwargs.get('snow_depth')].to_numpy()
                 snow_density = data[density_col].to_numpy() if density_col else data[kwargs.get('snow_density')].to_numpy()
             except KeyError as e:
-                raise ValueError(f"Missing required column: {e.args[0]}")
+                raise ValueError(f"Column {e.args[0]} is missing in the input data.")
             
             # Check for NaN values in the extracted columns          
             if np.isnan(snow_depth).any() or np.isnan(snow_density).any():
