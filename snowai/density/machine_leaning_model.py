@@ -1,12 +1,18 @@
 
+import os
+import joblib
 import numpy as np
 import pandas as pd
 import xgboost as xgb
+from sklearn import set_config
 from ..utils import clean_cache
 from ..utils.sturm_model_utils import validate_snow_class
-from ..utils.xgboost_utils import download_model, load_preprocessor, validate_DOY
+from ..utils.xgboost_utils import download_model, validate_DOY
 
 VALID_SNOW_CLASSES = ['alpine', 'maritime', 'prairie', 'tundra', 'taiga', 'ephemeral']
+
+set_config(transform_output='pandas')
+
 
 class MachineLearningDensity:
     def __init__(self, model_location: str = None, return_type: str = 'numpy'):
@@ -25,7 +31,13 @@ class MachineLearningDensity:
         return xgb_model
     
     def preprocess_data(self, input_data):
-        preprocessor = load_preprocessor()
+
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+
+        # Construct the full path to the pickle file
+        pickle_path = os.path.join(current_dir, '..', 'utils', 'preprocessor', 'feature_engineering_pipeline.joblib')
+
+        preprocessor=joblib.load(pickle_path)
         return preprocessor.transform(input_data)
 
     def predict(
@@ -68,11 +80,10 @@ class MachineLearningDensity:
             raise ValueError("Input data contains NaN values.")
         
         # validate snow class and DOY
-
         data_for_preprocessing=(
             input_data
             .assign(
-                Snow_Class=lambda x: validate_snow_class(x['Snow_Class'], VALID_SNOW_CLASSES),
+                Snow_Class=lambda x: np.char.title(validate_snow_class(x['Snow_Class'], VALID_SNOW_CLASSES)),
                 DOY=lambda x: validate_DOY(x['DOY'], origin=10)
             )
         )
