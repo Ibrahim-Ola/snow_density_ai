@@ -86,7 +86,6 @@ df=df_.assign(depth_m = df_['depth_cm'] / 100)
 # Statistical models
 
 ## Predict density using Jonas model
-
 jonas=JonasDensity(return_type='pandas')
 
 jonas.predict(
@@ -105,7 +104,6 @@ pistochi.predict(
 )
 
 ## Predict density using Sturm model
-
 sturm=SturmDensity(return_type='pandas')
 
 sturm.predict(
@@ -113,5 +111,19 @@ sturm.predict(
     DOY='date',
     snow_class='snow_class',
     snow_depth='depth_cm'
+)
+
+## Predict with ML model
+ml=MachineLearningDensity(return_type='pandas') ## This will download the ml model the first time
+
+ml.predict(
+    data=df,
+    snow_class='snow_class',
+    snow_depth='depth_cm',
+    elevation='elevation_m',
+    tavg='tavg',
+    tmin='tmin',
+    tmax='tmax',
+    doy='date'
 )
 ```
