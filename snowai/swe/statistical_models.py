@@ -152,21 +152,25 @@ class StatisticalModels(HillSWE):
         elif self.algorithm.lower() == 'jonas':
             density = JonasDensity(return_type='numpy').predict(data=data, **kwargs)
             depth = data[kwargs.get('snow_depth')].to_numpy()
+            depth = depth * 100  # Convert depth to cm
             
             if self.return_type.lower() == 'pandas':
                 return pd.Series(self.default_SWE(depth, density), index=data.index)
             return self.default_SWE(depth, density)
 
         elif self.algorithm.lower() == 'pistochi':
-            density = PistochiDensity(return_type='numpy').predict(data=data, **kwargs)
             
             try:
-                depth = data[kwargs.get('snow_depth')].to_numpy()
+                depth = data[depth_col].to_numpy() if depth_col else data[kwargs.get('snow_depth')].to_numpy()
             except KeyError as e:
                 raise ValueError(f"Missing required column: {e.args[0]}")
+            
+            if 'snow_depth' in kwargs:
+                kwargs.pop('snow_depth')
+            density = PistochiDensity(return_type='numpy').predict(data=data, **kwargs)
            
             if self.return_type.lower() == 'pandas':
-                return pd.Series(self.default_SWE(depth, density), index=data.index)
+                return pd.Series(self.default_SWE(depth*100, density), index=data.index)
             return self.default_SWE(depth, density)
         
         else:
