@@ -3,8 +3,10 @@ The :mod:`snowai.swe` module includes statistical and machine learning models fo
 """
 
 from .statistical_models import HillSWE, StatisticalModels
+from .machine_learning_model import MachineLearningSWE
 
 __all__ = [
     'HillSWE',
-    'StatisticalModels'
+    'StatisticalModels',
+    'MachineLearningSWE'
 ]
