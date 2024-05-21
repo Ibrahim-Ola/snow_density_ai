@@ -131,7 +131,7 @@ def ensure_file_available(filename):
             if file == "Snow Classification raster":
                 raster_url = "https://drive.google.com/file/d/1yhthVbkdBNm_pL5wl5YlwNaKN96iUGa8/view?usp=sharing"
             else:
-                raster_url = "https://drive.google.com/file/d/11FwI4Y8IYGP_6m2evQIv4Tu2l7F6edCK/view?usp=sharing"
+                raster_url = "https://drive.google.com/file/d/1tLHRR7wuI33FfrjBTBK_-KyXHnT2jfat/view?usp=sharing"
             print("Downloading now...")
             gdown.download(url=raster_url, output=cache_path, fuzzy=True, quiet=False)
             print("Download complete.")
