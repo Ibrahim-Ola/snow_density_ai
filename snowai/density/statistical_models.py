@@ -88,7 +88,7 @@ class SturmDensity:
             DOY = data[DOY].to_numpy()
             snow_class = data[snow_class].to_numpy(dtype=str)
         except KeyError as e:
-            raise ValueError(f"Missing required column: {e.args[0]}")
+            raise ValueError(f"Column {e.args[0]} is missing in the input data.")
         
         # Check for NaN values in the extracted columns
         if pd.isna(snow_depth).any() or pd.isna(DOY).any() or pd.isna(snow_class).any():
@@ -182,7 +182,7 @@ class JonasDensity:
             month = data[month].to_numpy()
             elevation = data[elevation].to_numpy()
         except KeyError as e:
-            raise ValueError(f"Missing required column: {e.args[0]}")
+            raise ValueError(f"Column {e.args[0]} is missing in the input data.")
         
         # Check for NaN values in the extracted columns
         if np.isnan(snow_depth).any() or np.isnan(month).any() or np.isnan(elevation).any():
@@ -257,7 +257,7 @@ class PistochiDensity:
         try:
             DOY = data[DOY].to_numpy()
         except KeyError as e:
-            raise ValueError(f"Missing required column: {e.args[0]}")
+            raise ValueError(f"Column {e.args[0]} is missing in the input data.")
         
         # Check for NaN values in the extracted columns
         if pd.isna(DOY).any():
