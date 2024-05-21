@@ -53,6 +53,8 @@ pip install .
 
 ## Usage
 
+### Predicting Snow Density
+
 ```python
 # Load libraries
 from snowai.density import (
@@ -126,4 +128,51 @@ ml.predict(
     tmax='tmax',
     doy='date'
 )
+```
+
+### Predicting SWE
+
+```python
+from snowai.swe import StatisticalModels, MachineLearningSWE
+
+
+sturm_swe=StatisticalModels(algorithm='sturm',return_type='pandas') # <- you only need to specify the algorithm
+                                                                    # we currently support hill, sturm, pstochi, and jonas
+
+sturm_swe.predict(
+    data=df,
+    DOY='date',
+    snow_class='snow_class',
+    snow_depth='depth_cm'
+)
+
+## You can use hill algo this way
+
+hill_swe=StatisticalModels(algorithm='hill',return_type='pandas')
+
+hill_swe.predict(
+    data=df,
+    pptwt='pptwt',
+    TD='TD',
+    DOY='date',
+    snow_depth='depth_mm'
+)
+
+# deleting the ML model to free space (optional)
+
+## Assuming you just predicted SWE
+
+ML_swe=MachineLearningSWE(return_type='numpy')
+ML_swe.predict(
+    data=df,
+    snow_class='snow_class',
+    snow_depth='depth_cm',
+    elevation='elevation_m',
+    tavg='tavg',
+    tmin='tmin',
+    tmax='tmax',
+    doy='date'
+)
+
+ML_swe.clear_cache() # this will delete the density mode from your PC (cache directory)
 ```
