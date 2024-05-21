@@ -73,7 +73,7 @@ class MachineLearningDensity:
                 }
             )
         except KeyError as e:
-            raise ValueError(f"Missing required column: {e.args[0]}")
+            raise ValueError(f"Column {e.args[0]} is missing in data.")
 
         # Check for NaN values in the extracted columns
         if input_data.isna().any().any():
