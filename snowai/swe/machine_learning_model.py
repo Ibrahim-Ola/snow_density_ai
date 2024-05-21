@@ -28,3 +28,6 @@ class MachineLearningSWE(MachineLearningDensity):
         if self.return_type.lower() == 'pandas':
             return pd.Series(SWE, index=data.index)
         return SWE
+    
+    def clear_cache(self):
+        return super().clear_cache()
