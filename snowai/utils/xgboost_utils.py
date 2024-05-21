@@ -1,31 +1,8 @@
 
-import os
-import dill
 import numpy as np
 import pandas as pd
 from .conversion_utils import ConvertData
 from ._other_utils import get_cache_path, ensure_file_available
-
-
-categorical_feature=['Snow_Class']
-numeric_features=['Elevation', 'Snow_Depth', 'TAVG', 'TMIN', 'TMAX', 'DOY']
-
-
-def load_preprocessor():
-    """
-    Loads the preprocessing pipeline.
-    """
-
-    # Get the current file's directory
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-
-    # Construct the full path to the pickle file
-    pickle_path = os.path.join(current_dir, 'preprocessor', 'preprocessing_pipeline.pkl')
-
-    with open(pickle_path, 'rb') as f:
-        preprocessor = dill.load(f)
-
-    return preprocessor
 
 
 def download_model():
