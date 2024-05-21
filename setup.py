@@ -39,6 +39,10 @@ def setup_package():
         license=LICENSE,
         python_requires=PYTHON_REQUIRES,
         packages=find_packages(),
+        include_package_data=True,
+        package_data={
+            '': ['feature_engineering_pipeline.joblib'],
+        },
         install_requires=parse_requirements('requirements.txt'),
         classifiers=[
             "Development Status :: Mature",
