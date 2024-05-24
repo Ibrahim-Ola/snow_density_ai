@@ -72,7 +72,7 @@ class HillSWE:
         DOY = validate_DOY(DOY, origin=10)
 
         # Calculate accumulated and ablated SWE using provided formulas
-        swe_preds = swe_acc_and_abl(pptwt=pptwt, TD=TD, DOY=DOY, h=snow_depth*100)
+        swe_preds = swe_acc_and_abl(pptwt=pptwt, TD=TD, DOY=DOY, h=snow_depth*1000)
 
         # Calculate final SWE using the Hill model
         swe = SWE_Hill(swe_acc=swe_preds['swe_acc'], swe_abl=swe_preds['swe_abl'], DOY=DOY, DOY_=DOY_)
@@ -154,19 +154,21 @@ class StatisticalModels(HillSWE):
         elif self.algorithm.lower() == 'sturm':
             density = SturmDensity(return_type='numpy').predict(data=data, **kwargs)
             depth = data[kwargs.get('snow_depth')].to_numpy()
+            depth = depth * 100  # Convert to cm
 
             if self.return_type.lower() == 'pandas':
                 return pd.Series(self.default_SWE(depth, density), index=data.index)
-            return self.default_SWE(depth*100, density)
+            return self.default_SWE(depth, density)
 
             
         elif self.algorithm.lower() == 'jonas':
             density = JonasDensity(return_type='numpy').predict(data=data, **kwargs)
             depth = data[kwargs.get('snow_depth')].to_numpy()
+            depth = depth * 100  # Convert to cm
             
             if self.return_type.lower() == 'pandas':
                 return pd.Series(self.default_SWE(depth, density), index=data.index)
-            return self.default_SWE(depth*100, density)
+            return self.default_SWE(depth, density)
 
         elif self.algorithm.lower() == 'pistochi':
             
@@ -181,7 +183,7 @@ class StatisticalModels(HillSWE):
            
             if self.return_type.lower() == 'pandas':
                 return pd.Series(self.default_SWE(depth*100, density), index=data.index)
-            return self.default_SWE(depth, density)
+            return self.default_SWE(depth*100, density)
         
         else:
             raise ValueError(f"Unsupported algorithm: {self.algorithm}. Choose either 'default', 'hill', 'sturm', 'jonas', or 'pistochi'.")
