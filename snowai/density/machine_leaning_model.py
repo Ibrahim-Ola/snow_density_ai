@@ -53,6 +53,22 @@ class MachineLearningDensity:
      ) -> np.ndarray | pd.Series:
         """
         A function to compute snow density using the machine learning model.
+
+        Parameters:
+        ===========
+            * data (pd.DataFrame): Input dataset containing the required columns.
+            * snow_class (str): Column name for snow class.
+            * elevation (str): Column name for elevation in meters.
+            * snow_depth (str): Column name for snow depth in meters.
+            * tavg (str): Column name for average temperature in Celsius.
+            * tmin (str): Column name for minimum temperature in Celsius.
+            * tmax (str): Column name for maximum temperature in Celsius.
+            * doy (str): Column name for the day of the year (defaults to October 1 as origin).
+
+        Returns:
+        ========
+            * np.ndarray | pd.Series: The function returns the snow density in g/cm^3.
+
         """
 
         # validate retune type
@@ -65,7 +81,7 @@ class MachineLearningDensity:
                 {
                     'Snow_Class': data[snow_class],
                     'Elevation': data[elevation],
-                    'Snow_Depth': data[snow_depth],
+                    'Snow_Depth': data[snow_depth]*100,
                     'TAVG': data[tavg],
                     'TMIN': data[tmin],
                     'TMAX': data[tmax],
