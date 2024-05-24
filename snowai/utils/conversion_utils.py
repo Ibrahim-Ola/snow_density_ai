@@ -141,15 +141,15 @@ class ConvertData:
     
     
     @staticmethod
-    def get_snow_class(lons: np.ndarray | pd.Series, lats: np.ndarray | pd.Series, raster: xr.DataArray = None) -> np.ndarray:
+    def get_snow_class(lons: np.ndarray | pd.Series | list, lats: np.ndarray | pd.Series | list, raster: xr.DataArray = None) -> np.ndarray:
         
         """
         Get the snow class for given longitudes and latitudes.
 
         Parameters:
         ===========
-            * lons (np.ndarray): Longitudes of the SNOTEL sites.
-            * lats (np.ndarray): Latitudes of the SNOTEL sites.
+            * lons (np.ndarray | pd.Series | list): Longitudes of the SNOTEL sites.
+            * lats (np.ndarray | pd.Series | list): Latitudes of the SNOTEL sites.
             * raster (xr.DataArray): The pre-loaded snow classification raster.
 
         Returns:
@@ -170,10 +170,10 @@ class ConvertData:
         )
 
         # Convert pandas Series to numpy arrays if necessary
-        if isinstance(lons, pd.Series):
-            lons = lons.to_numpy()
-        if isinstance(lats, pd.Series):
-            lats = lats.to_numpy()
+        if isinstance(lons, (pd.Series, list)):
+            lons = np.array(lons)
+        if isinstance(lats, (pd.Series, list)):
+            lats = np.array(lats)
 
         # Transform coordinates to the raster CRS
         transformer = Transformer.from_crs(crs_from="epsg:4326", crs_to=raster.rio.crs, always_xy=True)
