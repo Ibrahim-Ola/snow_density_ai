@@ -23,7 +23,7 @@ class MachineLearningSWE(MachineLearningDensity):
         density_preds = super().predict(data=data, **kwargs)
         snow_depth = data[kwargs.get('snow_depth')].to_numpy()
 
-        SWE=density_preds * snow_depth
+        SWE=density_preds * snow_depth*100
 
         if self.return_type.lower() == 'pandas':
             return pd.Series(SWE, index=data.index)
