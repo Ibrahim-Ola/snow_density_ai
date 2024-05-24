@@ -30,22 +30,29 @@ def validate_DOY(x: pd.Series | np.ndarray | list, origin: int = None) -> np.nda
 
     if not isinstance(x, pd.Series):
         x = pd.Series(x)
+
     
-
-    # Process numeric inputs directly
-    numeric = pd.to_numeric(x, errors='coerce')
-
-    if not numeric.isna().all():
-        validated_doy=np.where((numeric >= MIN_DOY) & (numeric <= MAX_DOY), numeric, np.nan)
+    if pd.api.types.is_datetime64_any_dtype(x):
+        converter=ConvertData()
+        validated_doy=converter.date_to_DOY(dates=x, origin=origin, algorithm='default')
         return validated_doy
     
     else:
-        dates = pd.to_datetime(x, errors='coerce')
 
-        if not dates.isna().all():
-            converter=ConvertData()
-            validated_doy=converter.date_to_DOY(dates=dates, origin=origin, algorithm='default')
+        # Process numeric inputs directly
+        numeric = pd.to_numeric(x, errors='coerce')
+
+        if not numeric.isna().all():
+            validated_doy=np.where((numeric >= MIN_DOY) & (numeric <= MAX_DOY), numeric, np.nan)
             return validated_doy
-        
+    
         else:
-            raise ValueError("Input contains no valid DOY or dates.")
+            dates = pd.to_datetime(x, errors='coerce')
+
+            if not dates.isna().all():
+                converter=ConvertData()
+                validated_doy=converter.date_to_DOY(dates=dates, origin=origin, algorithm='default')
+                return validated_doy
+            
+            else:
+                raise ValueError("Input contains no valid DOY or dates.")
