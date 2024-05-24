@@ -49,7 +49,7 @@ class MachineLearningDensity:
         tavg: str,
         tmin: str,
         tmax: str,
-        doy: str
+        DOY: str
      ) -> np.ndarray | pd.Series:
         """
         A function to compute snow density using the machine learning model.
@@ -63,7 +63,7 @@ class MachineLearningDensity:
             * tavg (str): Column name for average temperature in Celsius.
             * tmin (str): Column name for minimum temperature in Celsius.
             * tmax (str): Column name for maximum temperature in Celsius.
-            * doy (str): Column name for the day of the year (defaults to October 1 as origin).
+            * DOY (str): Column name for the day of the year (defaults to October 1 as origin).
 
         Returns:
         ========
@@ -85,7 +85,7 @@ class MachineLearningDensity:
                     'TAVG': data[tavg],
                     'TMIN': data[tmin],
                     'TMAX': data[tmax],
-                    'DOY': data[doy]
+                    'DOY': data[DOY]
                 }
             )
         except KeyError as e:
