@@ -43,8 +43,8 @@ class HillSWE:
             * pptwt (str): Column name for winter precipitation in mm.
             * TD (str): Column name for temperature difference in degree Celsius.
             * DOY (str): Column name for day of the year (with October 1 as the origin).
-            * snow_depth (str): Column name for snow depth in mm.
-            * DOY_ (int): Day of peak SWE, default is 180.
+            * snow_depth (str): Column name for snow depth in m.
+            * DOY_ (int): Day of peak SWE, defaults to 180.
 
         Returns:
         ========
@@ -72,7 +72,7 @@ class HillSWE:
         DOY = validate_DOY(DOY, origin=10)
 
         # Calculate accumulated and ablated SWE using provided formulas
-        swe_preds = swe_acc_and_abl(pptwt=pptwt, TD=TD, DOY=DOY, h=snow_depth)
+        swe_preds = swe_acc_and_abl(pptwt=pptwt, TD=TD, DOY=DOY, h=snow_depth*100)
 
         # Calculate final SWE using the Hill model
         swe = SWE_Hill(swe_acc=swe_preds['swe_acc'], swe_abl=swe_preds['swe_abl'], DOY=DOY, DOY_=DOY_)
@@ -108,6 +108,13 @@ class StatisticalModels(HillSWE):
         """
         Calculate the snow water equivalent (SWE) based on the chosen algorithm and parameters.
 
+        Parameters:
+        ===========
+            * data (pd.DataFrame): Input dataset containing the required columns.
+            * depth_col (str): Column name for snow depth in m.
+            * density_col (str): Column name for snow density in kg/m^3.
+            * **kwargs: Additional keyword arguments to pass to the chosen algorithm.
+
         Returns:
         ========
             * np.ndarray or pd.Series: An array or series of computed snow water equivalent (cm) values.
@@ -130,7 +137,7 @@ class StatisticalModels(HillSWE):
             if np.isnan(snow_depth).any() or np.isnan(snow_density).any():
                 raise ValueError("Input data contains NaN values.")
             
-            SWE = self.default_SWE(snow_depth, snow_density)
+            SWE = self.default_SWE(snow_depth*100, snow_density/1000)
 
             if self.return_type.lower() == 'pandas':
                 return pd.Series(SWE, index=data.index)
@@ -150,17 +157,16 @@ class StatisticalModels(HillSWE):
 
             if self.return_type.lower() == 'pandas':
                 return pd.Series(self.default_SWE(depth, density), index=data.index)
-            return self.default_SWE(depth, density)
+            return self.default_SWE(depth*100, density)
 
             
         elif self.algorithm.lower() == 'jonas':
             density = JonasDensity(return_type='numpy').predict(data=data, **kwargs)
             depth = data[kwargs.get('snow_depth')].to_numpy()
-            depth = depth * 100  # Convert depth to cm
             
             if self.return_type.lower() == 'pandas':
                 return pd.Series(self.default_SWE(depth, density), index=data.index)
-            return self.default_SWE(depth, density)
+            return self.default_SWE(depth*100, density)
 
         elif self.algorithm.lower() == 'pistochi':
             
