@@ -18,7 +18,7 @@ import numpy as np
 import pandas as pd
 from ..utils.xgboost_utils import validate_DOY
 from ..utils.jonas_model_utils import jonas_model_params, validate_month
-from ..utils.sturm_model_utils import sturm_model_params, validate_snow_class, validate_SturmDOY, get_sturm_params
+from ..utils.sturm_model_utils import validate_snow_class, validate_SturmDOY, get_sturm_params
 
 
 
@@ -69,7 +69,7 @@ class SturmDensity:
         Parameters:
         ===========
             * data (pd.DataFrame): Input dataset containing the required columns.
-            * snow_depth (str): Column name for snow depth in cm.
+            * snow_depth (str): Column name for snow depth in m.
             * DOY (str): The column name for the day of the year.  See link to original paper in the preamble for more information on how to compute DOY. 
             * snow_class (str): The column name for the snow type. Must be one of 'alpine', 'maritime', 'prairie', 'tundra' or 'taiga'.
 
@@ -106,7 +106,7 @@ class SturmDensity:
 
 
         density = self.rho(
-                h=snow_depth,
+                h=snow_depth*100,
                 doy=DOY,
                 rho_max=rho_max_array,
                 rho_0=rho_0_array,
