@@ -32,7 +32,7 @@ def datetime_to_SturmWaterYear(dates: pd.Series | np.ndarray | list[str | pd.Tim
         dates = pd.Series(dates)
     
     # Convert to datetime if not already
-    dates = pd.to_datetime(dates, errors='coerce')
+    dates = pd.to_datetime(dates, errors='coerce').dt.tz_localize(None)
 
 
     # Exclude dates in July, August, and September
@@ -76,7 +76,7 @@ def datetime_to_WaterYear(dates: pd.Series | np.ndarray | list[str | pd.Timestam
         dates = pd.Series(dates)
     
     # Convert to datetime if not already
-    dates = pd.to_datetime(dates, errors='coerce')
+    dates = pd.to_datetime(dates, errors='coerce').dt.tz_localize(None)
 
 
     # Calculate reference date for each date based on whether the date's month is before or after October
