@@ -2,8 +2,8 @@ numpy==1.26.4
 gdown==5.2.0
 pandas==2.2.2
 pyproj==3.6.1
-xgboost==2.0.3
-rioxarray==0.15.5
+xgboost
+rioxarray
 scikit-learn==1.4.0
-platformdirs==4.2.1
+platformdirs
 category_encoders==2.6.3
