@@ -49,7 +49,7 @@ class SturmDensity:
 
         Returns:
         ========
-            * np.ndarray: The function returns the snow density in kg/m^3.
+            * np.ndarray: The function returns the snow density in g/cm^3.
         """
 
         density_est = (rho_max - rho_0) * (1 - np.exp(-k1 * h - k2 * doy)) + rho_0
@@ -69,7 +69,7 @@ class SturmDensity:
         Parameters:
         ===========
             * data (pd.DataFrame): Input dataset containing the required columns.
-            * snow_depth (str): Column name for snow depth in m.
+            * snow_depth (str): Column name for snow depth in meters.
             * DOY (str): The column name for the day of the year.  See link to original paper in the preamble for more information on how to compute DOY. 
             * snow_class (str): The column name for the snow type. Must be one of 'alpine', 'maritime', 'prairie', 'tundra' or 'taiga'.
 
@@ -163,7 +163,7 @@ class JonasDensity:
         Parameters:
         ===========
             * data (pd.DataFrame): Input dataset containing the required columns.
-            * snow_depth (str): Column name for snow depth in cm.
+            * snow_depth (str): Column name for snow depth in meters.
             * month (str): The column name for the month.
             * elevation (str): The column name for the elevation in meters.
 
@@ -203,7 +203,7 @@ class JonasDensity:
 
         # Create a function to map parameters
         def get_params(month, elev_cat):
-            if pd.isna(month) or month not in jonas_model_params:
+            if pd.isna(month): #or month not in jonas_model_params:
                 return np.nan, np.nan
             params = jonas_model_params[month][elev_cat]
             return params['a'], params['b']
