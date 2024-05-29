@@ -121,10 +121,10 @@ def ensure_file_available(filename):
     if not os.path.exists(cache_path):
         print(f"The {file} needs to be downloaded.")
         if file == "Snow Classification raster":
-            print("This file is approximately 1.9 GB in size and will be stored at: {}".format(cache_path))
+            print("This file is approximately 2.0 GB in size and will be stored at: {}".format(cache_path))
         
         else:
-            print("This file is approximately 180 MB in size and will be stored at: {}".format(cache_path))
+            print("This file is approximately 185 MB in size and will be stored at: {}".format(cache_path))
         
         user_input = input("Do you want to proceed with the download? (yes/no): ")
         if user_input.lower() == 'yes' or user_input.lower() == 'y' or user_input.lower() == 'true':
