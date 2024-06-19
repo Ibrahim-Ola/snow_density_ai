@@ -26,7 +26,7 @@ To use this package, you need to have Python installed. I recommend using the [p
 
 Please follow the instructions [here](https://github.com/pyenv/pyenv?tab=readme-ov-file#installation) to install `pyenv` for your operation system (OS).
 
-Setup your virtual environment if you want or otherwise move to step 2.
+Setup your virtual environment if you would like to, otherwise move to step 2.
 
 ```bash
 pyenv install 3.11.5
@@ -38,14 +38,14 @@ source .venv/bin/activate
 pip install --upgrade pip
 ```
 
-### 3. Clone the Repository
+### 2. Clone the Repository
 
 ```bash
 git clone https://github.com/Ibrahim-Ola/snow_density_ai.git
 cd snow_density_ai
 ```
 
-### 4. Install Source Code 
+### 3. Install Source Code 
 
 ```bash
 pip install .
