@@ -1,5 +1,5 @@
 # SnowDensityAI
-SnowDensityAI: statistical and machine learning model for snow density and snow water equivalent prediction
+SnowDensityAI: statistical and machine learning models for snow density and snow water equivalent prediction.
 
 
 ## Benchmarks
