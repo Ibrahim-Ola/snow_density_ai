@@ -1,4 +1,6 @@
-# SnowDensityAI
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.13212864.svg)](https://doi.org/10.5281/zenodo.13212864)
+
+# SnowDensityAI 
 SnowDensityAI: statistical and machine learning models for snow density and snow water equivalent prediction.
 
 
