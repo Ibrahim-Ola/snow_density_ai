@@ -16,9 +16,9 @@ SnowDensityAI: statistical and machine learning models for snow density and snow
 
 ## Software and hardware list
 
-| Software used | Link to the software  | Hardware specifications  | OS required | GPU required? |
-|:---:  |:---:  |:---:  |:---:  |:---:  |
-| Python 3.11.5 | [https://github.com/pyenv/pyenv](https://github.com/pyenv/pyenv) | This code should work on any recent PC/Laptop | Linux (any), MacOS | No |
+| Software used | Link to the software  | Hardware specifications  | OS required |
+|:---:  |:---:  |:---:  |:---:  |
+| Python 3.11.5 | [https://github.com/pyenv/pyenv](https://github.com/pyenv/pyenv) | This code should work on any recent PC/Laptop | Linux (any), MacOS |
 
 ## Installation
 
